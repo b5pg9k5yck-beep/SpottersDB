@@ -1,1653 +1,705 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#080f1e"/>
-<title>Military Aviation Spotters Database</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>✈ Spotter DB</title>
 <style>
-  /* ── Reset & base ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:       #080f1e;
-    --bg2:      #0c1528;
-    --bg3:      #0f172a;
-    --bg4:      #1a2744;
-    --border:   #1e293b;
-    --border2:  #334155;
-    --text:     #e2e8f0;
-    --text2:    #94a3b8;
-    --text3:    #64748b;
-    --text4:    #475569;
-    --amber:    #f59e0b;
-    --green:    #4ade80;
-    --blue:     #7dd3fc;
-    --purple:   #a78bfa;
-    --red:      #ef4444;
-    --cyan:     #38bdf8;
-    --font-mono: 'Courier New', Courier, monospace;
-    --font-ui:   system-ui, -apple-system, sans-serif;
-  }
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 13px; }
-  body { display: flex; flex-direction: column; min-height: 100vh; }
-  input, select, button { font-family: var(--font-mono); }
-  select option { background: var(--bg3); }
-  button { cursor: pointer; }
-  input:focus, select:focus { outline: none; }
- 
-  /* ── Views ── */
-  .view { display: none; flex-direction: column; height: 100vh; }
-  .view.active { display: flex; }
- 
-  /* ── AUTH ── */
-  #auth-view {
-    align-items: center; justify-content: center;
-    background: radial-gradient(ellipse at 60% 40%, #0d1f3c 0%, var(--bg) 70%);
-    padding: 16px;
-  }
-  .auth-card {
-    background: var(--bg2); border: 2px solid var(--amber);
-    width: 100%; max-width: 400px; padding: 32px 28px;
-    box-shadow: 0 0 60px rgba(0,0,0,0.8);
-  }
-  .auth-icon { font-size: 36px; text-align: center; display: block; margin-bottom: 12px; }
-  .auth-title { font-size: 16px; font-weight: 900; color: var(--amber); letter-spacing: 0.12em; text-align: center; margin-bottom: 4px; }
-  .auth-sub { font-size: 10px; color: var(--text4); letter-spacing: 0.14em; text-align: center; margin-bottom: 24px; }
-  .field-label { font-size: 10px; color: var(--text4); font-weight: 800; letter-spacing: 0.1em; display: block; margin-bottom: 5px; }
-  .field-input {
-    width: 100%; padding: 11px 13px; background: var(--bg);
-    border: 1px solid var(--border); color: var(--text); font-size: 15px;
-    font-family: var(--font-mono); margin-bottom: 14px; border-radius: 4px;
-    transition: border-color 0.15s;
-  }
-  .field-input:focus { border-color: var(--amber); }
-  .btn-primary {
-    width: 100%; padding: 13px; background: #f59e0b22; border: 1px solid var(--amber);
-    color: var(--amber); font-size: 12px; font-weight: 900; letter-spacing: 0.12em;
-    border-radius: 4px; transition: background 0.15s; min-height: 48px; margin-top: 4px;
-  }
-  .btn-primary:hover { background: #f59e0b44; }
-  .btn-secondary {
-    width: 100%; padding: 11px; background: transparent; border: 1px solid var(--border2);
-    color: var(--text3); font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-    border-radius: 4px; margin-top: 10px; min-height: 48px;
-  }
-  .auth-toggle { font-size: 11px; color: var(--text4); text-align: center; margin-top: 18px; }
-  .auth-link { color: var(--amber); text-decoration: underline; cursor: pointer; }
-  .auth-error { font-size: 11px; color: var(--red); margin-bottom: 10px; padding: 8px 10px; background: #2a0a0a; border-radius: 4px; }
-  .auth-success { font-size: 11px; color: var(--green); margin-bottom: 10px; padding: 8px 10px; background: #0a2a0a; border-radius: 4px; }
- 
-  /* ── PENDING ── */
-  #pending-view { align-items: center; justify-content: center; padding: 16px; }
-  .pending-card { background: var(--bg2); border: 2px solid var(--amber); max-width: 420px; width: 100%; padding: 32px 28px; text-align: center; }
-  .pending-icon { font-size: 40px; margin-bottom: 16px; display: block; }
- 
-  /* ── HEADER ── */
-  .app-header {
-    background: linear-gradient(90deg,#0a0f1e,#111827,#0a0f1e);
-    border-bottom: 2px solid var(--amber);
-    padding: 12px 16px; flex-shrink: 0;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  }
-  .header-title { font-size: 15px; font-weight: 900; color: var(--amber); letter-spacing: 0.1em; }
-  .header-sub { font-size: 10px; color: var(--text4); margin-top: 2px; }
-  .header-actions { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-  .role-badge { font-size: 9px; padding: 2px 8px; border: 1px solid var(--border2); border-radius: 3px; }
-  .hbtn {
-    padding: 8px 13px; border-radius: 4px; font-size: 11px; font-weight: 800;
-    letter-spacing: 0.07em; min-height: 40px; border: 1px solid;
-    transition: background 0.15s;
-  }
- 
-  /* ── FILTER BAR ── */
-  .filter-bar { padding: 10px 14px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .filter-row { display: flex; gap: 8px; align-items: center; }
-  .search-input {
-    flex: 1; padding: 10px 12px; background: var(--bg3); border: 1px solid var(--border2);
-    color: var(--text); font-size: 14px; font-family: var(--font-mono); border-radius: 4px;
-    transition: border-color 0.15s;
-  }
-  .search-input:focus { border-color: var(--amber); }
-  .filter-btn {
-    padding: 10px 14px; border-radius: 4px; font-size: 12px; font-weight: 800;
-    white-space: nowrap; min-height: 44px; transition: all 0.15s;
-  }
-  .counter-badge {
-    padding: 8px 10px; background: var(--bg3); border: 1px solid var(--border);
-    font-size: 11px; color: var(--text4); border-radius: 4px; white-space: nowrap;
-  }
-  .filter-grid {
-    display: none; margin-top: 10px;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px;
-  }
-  .filter-grid.open { display: grid; }
-  .filter-sel {
-    width: 100%; padding: 9px 10px; background: var(--bg3); border: 1px solid var(--border2);
-    color: var(--text2); font-size: 13px; font-family: var(--font-mono); border-radius: 4px;
-  }
-  .clear-btn {
-    width: 100%; padding: 9px; background: #ef444422; border: 1px solid var(--red);
-    color: var(--red); font-size: 11px; font-weight: 800; border-radius: 4px; min-height: 42px;
-  }
- 
-  /* ── TABLE ── */
-  #records-container { flex: 1; overflow-y: auto; overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead { position: sticky; top: 0; z-index: 10; }
-  th {
-    padding: 7px 10px; text-align: left; white-space: nowrap;
-    background: var(--bg4); border-bottom: 2px solid #f59e0b44;
-    color: var(--text3); font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
-  }
-  tbody tr { cursor: pointer; border-bottom: 1px solid #0a0f1e; transition: background 0.08s; }
-  tbody tr.us-row  { background: var(--bg3); }
-  tbody tr.uk-row  { background: #0d1a0d; }
-  tbody tr.wld-row { background: #120a1f; }
-  tbody tr.sel-row { background: #1e3a5f !important; }
-  tbody tr:nth-child(even).us-row  { background: #0d1526; }
-  tbody tr:nth-child(even).uk-row  { background: #0a150a; }
-  tbody tr:nth-child(even).wld-row { background: #0f0818; }
-  td { padding: 5px 10px; font-size: 11px; vertical-align: middle; }
-  .reg-cell { color: var(--text); font-weight: 800; white-space: nowrap; }
-  .variant-cell { color: var(--text2); }
-  .call-cell { color: var(--text2); }
-  .call-cell.dim { color: #334155; }
-  .tc-cell { color: var(--text4); }
-  .country-cell { font-size: 10px; }
-  .spot-cell .spot-name { font-size: 9px; color: #334155; line-height: 1.2; }
-  .date-cell { color: var(--text4); white-space: nowrap; font-family: var(--font-mono); }
-  .type-badge {
-    display: inline-block; padding: 1px 7px; font-size: 9px; font-weight: 800;
-    letter-spacing: 0.06em; border-radius: 3px; white-space: nowrap;
-    border: 1px solid transparent;
-  }
-  .svc-code { font-size: 10px; font-weight: 700; }
- 
-  /* ── MOBILE CARDS ── */
-  .card-list { display: none; }
-  .record-card {
-    border-bottom: 1px solid #0a0f1e; padding: 12px 14px;
-    cursor: pointer; border-left: 4px solid transparent; transition: background 0.08s;
-  }
-  .record-card.us-row  { background: var(--bg3); }
-  .record-card.uk-row  { background: #0d1a0d; }
-  .record-card.wld-row { background: #120a1f; }
-  .record-card.sel-row { background: #1e3a5f !important; }
-  .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-  .card-reg { color: var(--text); font-weight: 900; font-family: var(--font-mono); font-size: 14px; }
-  .card-spot { color: var(--amber); font-weight: 800; font-size: 12px; margin-left: auto; }
-  .card-bot { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .card-type-text { color: var(--text2); font-size: 12px; }
-  .card-date { color: var(--text4); font-size: 11px; font-family: var(--font-mono); margin-left: auto; }
-  .card-detail {
-    margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);
-    display: none;
-  }
-  .card-detail.open { display: block; }
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .detail-item { padding-left: 8px; border-left: 2px solid rgba(255,255,255,0.08); }
-  .detail-label { font-size: 9px; color: #334155; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 2px; }
-  .detail-val { font-size: 11px; font-family: var(--font-mono); }
-  .edit-btn {
-    padding: 10px 18px; border-radius: 4px; font-size: 12px; font-weight: 800;
-    min-height: 44px; letter-spacing: 0.06em;
-  }
- 
-  /* ── DESKTOP DETAIL PANEL ── */
-  #detail-panel {
-    display: none; background: var(--bg2); flex-shrink: 0;
-    padding: 12px 16px; border-top: 2px solid transparent;
-  }
-  #detail-panel.open { display: block; }
-  .detail-panel-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-  .detail-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
-  .dpanel-item { padding-left: 8px; border-left: 2px solid rgba(255,255,255,0.06); }
-  .dpanel-label { font-size: 9px; color: #334155; font-weight: 800; letter-spacing: 0.1em; margin-bottom: 2px; }
-  .dpanel-val { font-size: 11px; font-family: var(--font-mono); }
-  .flag-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 2px; border: 1px solid transparent; }
- 
-  /* ── INFINITE SCROLL ── */
-  #scroll-sentinel { height: 1px; }
-  #load-more-indicator { padding: 16px; text-align: center; color: var(--text4); font-size: 10px; letter-spacing: 0.12em; display: none; }
-  #all-loaded-msg { padding: 16px; text-align: center; color: #1e293b; font-size: 10px; letter-spacing: 0.12em; display: none; }
- 
-  /* ── MODAL (bottom sheet on mobile, centered on desktop) ── */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-    z-index: 100; display: none; align-items: flex-end; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  @media (min-width: 768px) {
-    .modal-overlay { align-items: center; padding: 16px; }
-  }
-  .modal-sheet {
-    background: var(--bg2); width: 100%; max-height: 92vh;
-    border-radius: 16px 16px 0 0; border-top: 3px solid var(--amber);
-    display: flex; flex-direction: column;
-    box-shadow: 0 -8px 40px rgba(0,0,0,0.7);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  @media (min-width: 768px) {
-    .modal-sheet {
-      max-width: 720px; border-radius: 8px;
-      border: 2px solid var(--amber); border-top: 2px solid var(--amber);
-      max-height: 90vh; box-shadow: 0 0 60px rgba(0,0,0,0.9);
-    }
-  }
-  .modal-handle { display: flex; justify-content: center; padding: 10px 0 4px; }
-  .modal-handle-bar { width: 40px; height: 4px; border-radius: 2px; background: var(--border2); }
-  @media (min-width: 768px) { .modal-handle { display: none; } }
-  .modal-header {
-    padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-  }
-  .modal-title { font-size: 15px; font-weight: 900; letter-spacing: 0.08em; }
-  .modal-sub { font-size: 11px; color: var(--text4); margin-top: 2px; }
-  .modal-close {
-    background: none; border: 1px solid var(--border2); color: var(--text3);
-    padding: 6px 14px; font-size: 14px; font-family: var(--font-mono);
-    border-radius: 4px; min-height: 44px; min-width: 44px;
-  }
-  .modal-body { overflow-y: auto; flex: 1; }
-  .modal-footer {
-    padding: 12px 16px; border-top: 1px solid var(--border);
-    display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; flex-shrink: 0;
-  }
- 
-  /* ── FORM ── */
-  .form-preview {
-    padding: 10px 16px; background: var(--bg);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    display: none; align-items: center; gap: 10px; flex-wrap: wrap;
-  }
-  .form-preview.visible { display: flex; }
-  .form-preview-reg { font-weight: 900; font-family: var(--font-mono); font-size: 15px; }
-  .form-preview-spot { color: var(--amber); font-weight: 800; font-size: 13px; }
-  .form-preview-date { color: var(--text4); font-size: 12px; font-family: var(--font-mono); }
-  .form-grid { padding: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-  .form-field label { font-size: 11px; color: var(--text4); font-weight: 800; letter-spacing: 0.1em; display: block; margin-bottom: 5px; }
-  .form-field label .req { color: var(--amber); margin-left: 3px; }
-  .form-input {
-    width: 100%; padding: 10px 12px; background: var(--bg);
-    border: 1px solid var(--border); color: var(--text); font-size: 14px;
-    font-family: var(--font-mono); border-radius: 4px; transition: border-color 0.15s;
-  }
-  .form-input:focus { border-color: var(--amber); }
-  .form-input.error { border-color: var(--red); }
-  .form-hint { font-size: 11px; color: #334155; margin-top: 4px; }
-  .form-err-msg { font-size: 11px; color: var(--red); margin-top: 4px; }
-  .modal-status { font-size: 12px; font-weight: 700; margin-right: auto; align-self: center; }
-  .mbtn {
-    padding: 10px 18px; border-radius: 4px; font-size: 12px; font-weight: 800;
-    letter-spacing: 0.06em; min-height: 44px; border: 1px solid; transition: background 0.15s;
-  }
-  .mbtn:disabled { opacity: 0.45; cursor: default; }
-  .mbtn-outline { background: transparent; border-color: var(--border2); color: var(--text3); }
- 
-  /* ── DUP BANNER ── */
-  .dup-banner { margin: 0 16px 12px; padding: 11px 14px; border-radius: 6px; display: none; }
-  .dup-checking { background: var(--bg3); border: 1px solid var(--border2); display: flex; align-items: center; gap: 8px; }
-  .dup-clear { background: #0a2a0a; border: 1px solid #4ade8066; display: flex; align-items: center; gap: 10px; }
-  .dup-found { background: #2a0a0a; border: 2px solid var(--red); }
-  .dup-match { background: #1a0505; border: 1px solid #ef444433; border-radius: 4px; padding: 8px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
-  .dup-match-reg { color: var(--text); font-weight: 900; font-family: var(--font-mono); font-size: 13px; }
- 
-  /* ── ADMIN ── */
-  #admin-view { flex-direction: column; background: var(--bg); padding: 20px; overflow-y: auto; }
-  .admin-header { border-bottom: 2px solid var(--amber); padding-bottom: 12px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-  .admin-title { font-size: 15px; font-weight: 900; color: var(--amber); letter-spacing: 0.1em; }
-  .tab-bar { display: flex; gap: 6px; margin-bottom: 16px; }
-  .tab {
-    padding: 7px 16px; border: 1px solid; border-radius: 4px;
-    font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
-  }
-  .tab.active { border-color: var(--amber); background: #f59e0b22; color: var(--amber); }
-  .tab:not(.active) { border-color: var(--border); background: transparent; color: var(--text3); }
-  .user-card { background: var(--bg2); border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 10px; border-radius: 4px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .user-name { font-weight: 800; color: var(--text); font-size: 13px; }
-  .user-email { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .user-meta { font-size: 10px; color: var(--text4); margin-top: 3px; }
-  .user-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .role-select { padding: 7px 10px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); font-size: 13px; border-radius: 4px; }
-  .approve-btn { padding: 7px 16px; background: #4ade8022; border: 1px solid var(--green); color: var(--green); font-size: 11px; font-weight: 800; border-radius: 4px; min-height: 40px; }
-  .perm-table { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 4px; padding: 14px 16px; margin-top: 20px; }
-  .perm-table h3 { font-size: 10px; color: var(--amber); font-weight: 800; letter-spacing: 0.12em; margin-bottom: 10px; }
-  .perm-row { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
-  .empty-msg { padding: 32px; text-align: center; color: #334155; font-size: 11px; letter-spacing: 0.12em; }
- 
-  /* ── RESPONSIVE ── */
-  @media (max-width: 767px) {
-    table.desktop-table, #detail-panel { display: none !important; }
-    .card-list { display: block; }
-    .header-title { font-size: 13px; }
-  }
-  @media (min-width: 768px) {
-    .card-list { display: none; }
-    table.desktop-table { display: table; }
-  }
- 
-  /* ── SPINNER ── */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { display: inline-block; animation: spin 1s linear infinite; }
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e1a;--surface:#111827;--card:#161e2e;--border:#1e2d45;--accent:#00c2ff;--accent-dim:#005e7a;--accent-glow:rgba(0,194,255,0.15);--text:#e2eaf5;--muted:#5a7090;--warning:#f59e0b;--success:#10b981;--red:#ef4444;--tag:#1a2942}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh}.screen.active{display:flex}
+#screen-login{flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.08) 0%,transparent 70%),linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);position:relative;overflow:hidden}
+#screen-login::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,194,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,255,0.03) 1px,transparent 1px);background-size:40px 40px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;width:100%;max-width:380px;position:relative;z-index:1;box-shadow:0 0 60px rgba(0,194,255,0.1),0 20px 60px rgba(0,0,0,0.5)}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .icon{font-size:48px;display:block;margin-bottom:12px;filter:drop-shadow(0 0 20px var(--accent))}
+.login-logo h1{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--accent);letter-spacing:0.15em;text-shadow:0 0 20px var(--accent)}
+.login-logo p{color:var(--muted);font-size:11px;letter-spacing:0.1em;margin-top:6px;font-family:'Orbitron',sans-serif}
+.field{margin-bottom:16px}
+.field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.12em;margin-bottom:6px}
+.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:15px;font-family:'JetBrains Mono',monospace;outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
+.field input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px rgba(0,194,255,0.1)}
+.btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;cursor:pointer;box-shadow:0 0 20px rgba(0,194,255,0.3);transition:opacity .2s}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}.btn-primary:active{opacity:.85}
+.msg-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:var(--red);padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
+.msg-info{color:var(--muted);font-size:11px;text-align:center;margin-top:16px;line-height:1.6}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#screen-app{flex-direction:column}
+.app-wrap{max-width:600px;margin:0 auto;width:100%;padding-bottom:32px}
+.app-header{background:linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);border-bottom:1px solid var(--border);padding:16px 16px 0;position:sticky;top:0;z-index:100}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:6px}
+.header-title h1{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;letter-spacing:0.1em;color:var(--accent);text-shadow:0 0 20px var(--accent)}
+.header-title p{color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:0.05em}
+.header-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.btn-add{background:var(--accent);border:none;border-radius:10px;color:#000;padding:9px 12px;cursor:pointer;font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;box-shadow:0 0 16px var(--accent-glow)}
+.btn-icon{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:9px 11px;cursor:pointer;font-size:14px;line-height:1}
+.btn-export{background:none;border:1px solid var(--success);border-radius:10px;color:var(--success);padding:9px 11px;cursor:pointer;font-size:13px;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:0.05em}
+.btn-import{background:none;border:1px solid var(--warning);border-radius:10px;color:var(--warning);padding:9px 11px;cursor:pointer;font-size:13px;font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:0.05em}
+.user-pill{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 7px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex}
+.tab-btn{flex:1;padding:10px 0;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:0.1em;cursor:pointer;transition:all .2s}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.content{padding:16px}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none;margin-bottom:10px;-webkit-appearance:none}
+.filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;cursor:pointer;-webkit-appearance:none}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
+.stat-num{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900}
+.stat-label{color:var(--muted);font-size:9px;letter-spacing:0.08em;margin-top:2px;font-family:'Orbitron',sans-serif}
+.active-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.filter-tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);cursor:pointer}
+.clear-btn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer}
+.record-list{display:grid;gap:8px}
+.record-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .2s;-webkit-tap-highlight-color:transparent}
+.record-card.expanded{border-color:var(--accent)}.record-card.mine{border-left:3px solid var(--accent)}
+.record-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.record-left{flex:1;min-width:0}.reg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.record-reg{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);font-size:15px}
+.ops-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap}
+.my-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(0,194,255,0.1);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
+.record-airline{color:var(--text);font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.record-right{text-align:right;flex-shrink:0}
+.record-spot{color:var(--warning);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
+.record-date{color:var(--muted);font-size:11px;margin-top:2px}
+.record-detail{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:none}
+.record-card.expanded .record-detail{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.detail-key{color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.1em}
+.detail-val{color:var(--text);font-size:13px;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.detail-actions{display:flex;gap:8px}
+.btn-edit{flex:1;padding:8px;border-radius:8px;cursor:pointer;background:none;border:1px solid var(--accent-dim);color:var(--accent);font-size:12px;font-family:'Orbitron',sans-serif}
+.btn-delete{padding:8px 14px;border-radius:8px;cursor:pointer;background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);font-size:13px}
+.pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px}
+.page-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:16px}
+.page-btn:disabled{opacity:.35;cursor:not-allowed}
+.page-info{color:var(--muted);font-size:13px;font-family:'JetBrains Mono',monospace}
+.empty-state{text-align:center;color:var(--muted);padding:48px 0;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:0.1em}
+.stats-section{margin-bottom:24px}
+.stats-section h3{font-family:'Orbitron',sans-serif;color:var(--accent);font-size:12px;margin-bottom:12px;letter-spacing:0.1em}
+.bar-row{margin-bottom:10px}.bar-meta{display:flex;justify-content:space-between;margin-bottom:4px}
+.bar-name{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%}
+.bar-count{font-family:'JetBrains Mono',monospace;font-size:13px}
+.bar-track{background:var(--border);border-radius:4px;height:4px}.bar-fill{height:100%;border-radius:4px}
+.country-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.country-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+.country-name{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:72%}
+.country-count{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:12px;font-weight:700}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 0 40px var(--accent-glow);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-title{color:var(--accent);font-family:'Orbitron',sans-serif;font-size:15px}
+.modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px}
+.modal-fields{display:grid;gap:12px}
+.modal-field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.1em;margin-bottom:5px}
+.modal-field input,.modal-field select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none;-webkit-appearance:none}
+.modal-actions{display:flex;gap:8px;margin-top:20px}
+.btn-cancel{flex:1;padding:11px;border-radius:8px;cursor:pointer;background:none;border:1px solid var(--border);color:var(--muted);font-size:13px}
+.btn-save{flex:2;padding:11px;border-radius:8px;cursor:pointer;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
+.btn-run-import{width:100%;padding:12px;border-radius:8px;cursor:pointer;background:var(--warning);border:none;color:#000;font-size:13px;font-weight:700;font-family:'Orbitron',sans-serif;letter-spacing:0.05em;margin-top:16px}
+.import-note{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px}
+.import-status{margin-top:12px;font-size:13px;min-height:20px;text-align:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:transform .3s ease;z-index:2000;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.success{border-color:var(--success);color:var(--success)}.toast.error{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
  
-<!-- ════════════════════════════════════════════════════
-     AUTH VIEW
-════════════════════════════════════════════════════ -->
-<div id="auth-view" class="view active">
-  <div class="auth-card">
-    <span class="auth-icon">✈</span>
-    <div class="auth-title">MILITARY AVIATION SPOTTERS</div>
-    <div class="auth-sub">DATABASE — UK AIRBASES 1988–2018</div>
- 
-    <div id="auth-error"  class="auth-error"  style="display:none"></div>
-    <div id="auth-success"class="auth-success"style="display:none"></div>
- 
-    <!-- Login form -->
-    <div id="login-form">
-      <label class="field-label" for="login-email">EMAIL ADDRESS</label>
-      <input class="field-input" type="email" id="login-email" placeholder="you@example.com" autocomplete="email"/>
-      <label class="field-label" for="login-pass">PASSWORD</label>
-      <input class="field-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
-      <button class="btn-primary" id="login-btn">SIGN IN</button>
-      <div class="auth-toggle">No account? <span class="auth-link" id="show-register">Request access</span></div>
-    </div>
- 
-    <!-- Register form -->
-    <div id="register-form" style="display:none">
-      <label class="field-label" for="reg-name">FULL NAME</label>
-      <input class="field-input" type="text" id="reg-name" placeholder="Your full name" autocomplete="name"/>
-      <label class="field-label" for="reg-email">EMAIL ADDRESS</label>
-      <input class="field-input" type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
-      <label class="field-label" for="reg-pass">PASSWORD</label>
-      <input class="field-input" type="password" id="reg-pass" placeholder="Min. 8 characters" autocomplete="new-password"/>
-      <label class="field-label" for="reg-conf">CONFIRM PASSWORD</label>
-      <input class="field-input" type="password" id="reg-conf" placeholder="Repeat password" autocomplete="new-password"/>
-      <div style="font-size:10px;color:var(--text4);margin-bottom:14px;line-height:1.6">
-        Access is invite-only. Your account will be reviewed by an administrator before you can view the database.
-      </div>
-      <button class="btn-primary" id="register-btn">REQUEST ACCESS</button>
-      <button class="btn-secondary" id="show-login">BACK TO SIGN IN</button>
-    </div>
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo"><span class="icon">✈</span><h1>SPOTTER DB</h1><p>CIVIL AIRLINER DATABASE</p></div>
+    <div class="field"><label for="login-email">EMAIL</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none"/></div>
+    <div class="field"><label for="login-pass">PASSWORD</label><input type="password" id="login-pass" placeholder="Password" autocomplete="current-password"/></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">SIGN IN</button>
+    <div class="msg-error" id="login-error"></div>
+    <div class="msg-info">🔐 Authorised users only</div>
   </div>
 </div>
  
-<!-- ════════════════════════════════════════════════════
-     PENDING VIEW
-════════════════════════════════════════════════════ -->
-<div id="pending-view" class="view">
-  <div class="pending-card">
-    <span class="pending-icon">⏳</span>
-    <div class="auth-title" style="margin-bottom:12px">AWAITING APPROVAL</div>
-    <p style="font-size:11px;color:var(--text3);line-height:1.7;margin-bottom:20px">
-      Your account request has been received.<br/>
-      An administrator will review and activate your access shortly.
-    </p>
-    <div id="pending-email" style="font-size:10px;color:var(--text4);margin-bottom:20px"></div>
-    <button class="btn-secondary" id="pending-signout">SIGN OUT</button>
-  </div>
-</div>
- 
-<!-- ════════════════════════════════════════════════════
-     DATABASE VIEW
-════════════════════════════════════════════════════ -->
-<div id="db-view" class="view">
- 
-  <!-- Header -->
-  <div class="app-header">
-    <div style="flex:1;min-width:0">
-      <div class="header-title" id="header-title">✈ MILITARY AVIATION SPOTTERS DATABASE</div>
-      <div class="header-sub">
-        <span style="color:var(--amber)" id="total-count">0</span> records ·
-        <span style="color:var(--blue)">🇺🇸 1,378</span> ·
-        <span style="color:var(--green)">🇬🇧 1,012</span> ·
-        <span style="color:var(--purple)">🌍 1,945</span>
+<div id="screen-app" class="screen">
+  <div class="app-wrap">
+    <div class="app-header">
+      <div class="header-top">
+        <div class="header-title"><h1>✈ SPOTTER DB</h1><p>CIVIL AIRLINER DATABASE</p></div>
+        <div class="header-actions">
+          <span class="user-pill" id="user-pill"></span>
+          <button class="btn-import" onclick="openImport()" title="Import CSV">⬆ IMP</button>
+          <button class="btn-export" onclick="exportCSV()" title="Export CSV">⬇ CSV</button>
+          <button class="btn-add" onclick="openModal()">+ LOG</button>
+          <button class="btn-icon" onclick="doLogout()" title="Sign out">⏻</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('list',this)">LIST</button>
+        <button class="tab-btn" onclick="switchTab('stats',this)">STATS</button>
       </div>
     </div>
-    <div class="header-actions">
-      <span class="role-badge" id="user-role-badge">VIEWER</span>
-      <button class="hbtn" id="add-btn" style="display:none;border-color:var(--green);background:#4ade8022;color:var(--green)">+ ADD</button>
-      <button class="hbtn" id="admin-btn" style="display:none;border-color:var(--purple);background:#a78bfa22;color:var(--purple)">Admin</button>
-      <button class="hbtn" id="db-signout" style="border-color:var(--border2);background:transparent;color:var(--text3)">Out</button>
-    </div>
-  </div>
  
-  <!-- Filter bar -->
-  <div class="filter-bar">
-    <div class="filter-row">
-      <input class="search-input" type="search" id="search-input" placeholder="Search serial, callsign, type, country…"/>
-      <button class="filter-btn" id="filter-toggle-btn" style="border:1px solid var(--border2);background:transparent;color:var(--text3)">Filters</button>
-      <div class="counter-badge">
-        <span style="color:var(--amber);font-weight:800" id="loaded-count">0</span>
-        <span style="color:#334155" id="total-label"></span>
-      </div>
-    </div>
-    <div class="filter-grid" id="filter-grid">
-      <div>
-        <label class="field-label" style="margin-bottom:4px">Nation</label>
-        <select class="filter-sel" id="f-service">
-          <option value="">All Nations</option>
-          <option value="US">🇺🇸 US Forces</option>
-          <option value="UK">🇬🇧 UK Forces</option>
-          <option value="WORLD">🌍 World</option>
+    <div class="content" id="tab-list">
+      <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()"/>
+      <div class="filters">
+        <select class="filter-select" id="filter-country" onchange="applyFilters()"><option value="">Country</option></select>
+        <select class="filter-select" id="filter-spot" onchange="applyFilters()"><option value="">Airport</option></select>
+        <select class="filter-select" id="sort-by" onchange="onSort()">
+          <option value="reg">Reg A→Z</option><option value="regdesc">Reg Z→A</option>
+          <option value="date">Date ↓</option><option value="airline">Airline</option>
         </select>
       </div>
-      <div>
-        <label class="field-label" style="margin-bottom:4px">Country</label>
-        <select class="filter-sel" id="f-country"><option value="">All Countries</option></select>
-      </div>
-      <div>
-        <label class="field-label" style="margin-bottom:4px">Type</label>
-        <select class="filter-sel" id="f-type"><option value="">All Types</option></select>
-      </div>
-      <div>
-        <label class="field-label" style="margin-bottom:4px">Airfield</label>
-        <select class="filter-sel" id="f-spot"><option value="">All Airfields</option></select>
-      </div>
-      <div>
-        <label class="field-label" style="margin-bottom:4px">Service</label>
-        <select class="filter-sel" id="f-ops"><option value="">All Services</option></select>
-      </div>
-      <div style="display:flex;align-items:flex-end">
-        <button class="clear-btn" id="clear-filters-btn" style="display:none">Clear All</button>
-      </div>
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="active-filters" id="active-filters" style="display:none"></div>
+      <div class="record-list" id="record-list"><div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading...</div></div>
+      <div class="pagination" id="pagination"></div>
     </div>
-  </div>
- 
-  <!-- Error -->
-  <div id="db-error" style="padding:8px 16px;color:var(--red);font-size:12px;background:#200a0a;display:none"></div>
- 
-  <!-- Records area -->
-  <div id="records-container">
- 
-    <!-- Desktop table -->
-    <table class="desktop-table">
-      <thead>
-        <tr>
-          <th>SERIAL / REG</th><th>TYPE</th><th>VARIANT</th>
-          <th>CALLSIGN</th><th>T/C</th><th>SERVICE</th>
-          <th>UNIT / SQN</th><th>COUNTRY</th><th>SPOTTED AT</th><th>DATE</th>
-        </tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
- 
-    <!-- Mobile cards -->
-    <div class="card-list" id="card-list"></div>
- 
-    <!-- Infinite scroll -->
-    <div id="scroll-sentinel"></div>
-    <div id="load-more-indicator"><span class="spinner">⟳</span> LOADING MORE…</div>
-    <div id="all-loaded-msg"></div>
- 
-    <!-- Loading state -->
-    <div id="loading-msg" style="padding:60px;text-align:center;color:#334155;letter-spacing:0.15em">LOADING…</div>
-    <div id="empty-msg" style="padding:60px;text-align:center;color:#334155;letter-spacing:0.12em;display:none">NO RECORDS MATCH YOUR FILTERS</div>
-  </div>
- 
-  <!-- Desktop detail panel -->
-  <div id="detail-panel">
-    <div class="detail-panel-top" id="detail-top"></div>
-    <div class="detail-panel-grid" id="detail-grid"></div>
+    <div class="content" id="tab-stats" style="display:none"></div>
   </div>
 </div>
  
-<!-- ════════════════════════════════════════════════════
-     ADMIN VIEW
-════════════════════════════════════════════════════ -->
-<div id="admin-view" class="view">
-  <div class="admin-header">
-    <div>
-      <div class="admin-title">⚙ ADMIN PANEL</div>
-      <div style="font-size:10px;color:var(--text4);margin-top:2px;letter-spacing:0.08em">USER MANAGEMENT</div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button class="hbtn" id="admin-to-db" style="border-color:var(--cyan);background:#38bdf822;color:var(--cyan)">← Database</button>
-      <button class="hbtn" id="admin-signout" style="border-color:var(--red);background:#ef444422;color:var(--red)">Sign Out</button>
-    </div>
-  </div>
-  <div id="admin-msg" style="display:none;margin-bottom:12px;padding:8px 12px;border-radius:4px;font-size:12px"></div>
-  <div class="tab-bar">
-    <button class="tab active" id="tab-pending">PENDING</button>
-    <button class="tab" id="tab-all">ALL USERS</button>
-  </div>
-  <div id="users-list"></div>
-  <div class="perm-table">
-    <h3>ROLE PERMISSIONS</h3>
-    <div class="perm-row">
-      <span class="type-badge" style="background:#4ade8022;color:var(--green);border-color:#4ade8055">VIEWER</span>
-      <span style="font-size:11px;color:var(--text3)">Can view and search all records. Cannot add or edit.</span>
-    </div>
-    <div class="perm-row">
-      <span class="type-badge" style="background:#f59e0b22;color:var(--amber);border-color:#f59e0b55">EDITOR</span>
-      <span style="font-size:11px;color:var(--text3)">Can view, add new sightings, and edit existing records.</span>
-    </div>
-    <div class="perm-row">
-      <span class="type-badge" style="background:#a78bfa22;color:var(--purple);border-color:#a78bfa55">ADMIN</span>
-      <span style="font-size:11px;color:var(--text3)">Full access including user management.</span>
-    </div>
-  </div>
-</div>
- 
-<!-- ════════════════════════════════════════════════════
-     ADD SIGHTING MODAL
-════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="add-modal">
-  <div class="modal-sheet" id="add-sheet">
-    <div class="modal-handle"><div class="modal-handle-bar"></div></div>
+<!-- Log/Edit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card">
     <div class="modal-header">
-      <div>
-        <div class="modal-title" id="add-modal-title" style="color:var(--amber)">Add New Sighting</div>
-        <div class="modal-sub">Required fields marked *</div>
-      </div>
-      <button class="modal-close" id="add-modal-close">✕</button>
+      <span class="modal-title" id="modal-title">✈️ LOG NEW SIGHTING</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <!-- Duplicate banner -->
-    <div class="dup-banner" id="dup-banner"></div>
-    <!-- Preview strip -->
-    <div class="form-preview" id="add-preview">
-      <span class="form-preview-reg" id="prev-reg"></span>
-      <span id="prev-badge"></span>
-      <span class="form-preview-spot" id="prev-spot"></span>
-      <span class="form-preview-date" id="prev-date"></span>
+    <div class="modal-fields">
+      <input type="hidden" id="edit-id"/>
+      <div class="modal-field"><label>REGISTRATION *</label><input type="text" id="f-reg" placeholder="e.g. G-BOAC"/></div>
+      <div class="modal-field"><label>AIRLINE</label><input type="text" id="f-airline" placeholder="e.g. British Airways"/></div>
+      <div class="modal-field"><label>AIRCRAFT TYPE</label><input type="text" id="f-type" placeholder="e.g. 747-436"/></div>
+      <div class="modal-field"><label>ICAO CODE (OPS)</label><input type="text" id="f-ops" placeholder="e.g. BAW"/></div>
+      <div class="modal-field"><label>AIRPORT / SPOT</label><input type="text" id="f-spot" placeholder="e.g. LHR"/></div>
+      <div class="modal-field"><label>DATE SPOTTED</label><input type="date" id="f-date"/></div>
+      <div class="modal-field"><label>COUNTRY</label><select id="f-country"></select></div>
     </div>
-    <div class="modal-body">
-      <div class="form-grid" id="add-form-grid"></div>
-    </div>
-    <div class="modal-footer">
-      <span class="modal-status" id="add-status" style="display:none"></span>
-      <button class="mbtn mbtn-outline" id="add-cancel">Cancel</button>
-      <button class="mbtn" id="add-save-more" style="border-color:var(--cyan);background:#38bdf822;color:var(--cyan)">Save + Add Another</button>
-      <button class="mbtn" id="add-save-close" style="border-color:var(--amber);background:#f59e0b22;color:var(--amber)">Save + Close</button>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveRecord()">SAVE SIGHTING</button>
     </div>
   </div>
 </div>
  
-<!-- ════════════════════════════════════════════════════
-     EDIT SIGHTING MODAL
-════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="edit-modal">
-  <div class="modal-sheet" id="edit-sheet">
-    <div class="modal-handle"><div class="modal-handle-bar"></div></div>
+<!-- Import Modal -->
+<div class="modal-overlay" id="import-modal">
+  <div class="modal-card">
     <div class="modal-header">
-      <div>
-        <div class="modal-title" id="edit-modal-title" style="color:var(--amber)">Edit Record</div>
-        <div class="modal-sub">Required fields marked *</div>
+      <span class="modal-title" style="color:var(--warning)">⬆ IMPORT CSV FILE</span>
+      <button class="modal-close" onclick="closeImport()">✕</button>
+    </div>
+    <div class="modal-fields">
+      <div class="modal-field">
+        <label>SELECT CSV FILE</label>
+        <input type="file" id="import-file" accept=".csv" style="color:var(--text);padding:8px"/>
       </div>
-      <button class="modal-close" id="edit-modal-close">✕</button>
+      <div class="modal-field">
+        <label>COUNTRY NAME</label>
+        <input type="text" id="import-country" placeholder="e.g. GERMANY"/>
+      </div>
     </div>
-    <div class="form-preview" id="edit-preview">
-      <span class="form-preview-reg" id="edit-prev-reg"></span>
-      <span id="edit-prev-badge"></span>
-      <span class="form-preview-spot" id="edit-prev-spot"></span>
-      <span class="form-preview-date" id="edit-prev-date"></span>
+    <div class="import-note">
+      ⚠️ Your XLS file must be saved as <strong>CSV</strong> first.<br>
+      In Excel/Numbers: <strong>File → Save As → CSV</strong><br><br>
+      The CSV must have these column headers:<br>
+      <strong>Airline, Registration, Type, Ops, Spot, Date</strong>
     </div>
-    <div class="modal-body">
-      <div class="form-grid" id="edit-form-grid"></div>
-    </div>
-    <div class="modal-footer">
-      <span class="modal-status" id="edit-status" style="display:none"></span>
-      <button class="mbtn mbtn-outline" id="edit-cancel">Cancel</button>
-      <button class="mbtn" id="edit-save" style="border-color:var(--amber);background:#f59e0b22;color:var(--amber)">Save Changes</button>
-    </div>
+    <button class="btn-run-import" onclick="runImport()">UPLOAD TO SUPABASE</button>
+    <div class="import-status" id="import-status"></div>
   </div>
 </div>
  
+<div class="toast" id="toast"></div>
 <script>
-// ══════════════════════════════════════════════════
-// CONFIGURATION — fill in your Supabase details here
-// ══════════════════════════════════════════════════
-const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
  
-// ══════════════════════════════════════════════════
-// CONSTANTS
-// ══════════════════════════════════════════════════
-const BATCH = 100;
+const SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg';
+let SB_TOKEN = null;
+let currentUser = null;
  
-const SPOT_NAMES = {
-  EGVA:'RAF Fairford',EGUN:'RAF Mildenhall',EGUL:'RAF Lakenheath',
-  EGXW:'RAF Waddington',EGXJ:'RAF Finningley',EGXE:'RAF Leeming',
-  EGLL:'London Heathrow',EGNM:'Leeds Bradford',EGNV:'Teesside',
-  EGVN:'RAF Brize Norton',EGXI:'RAF Kinloss',EGXC:'RAF Leuchars',
-  EGXU:'RAF Linton-on-Ouse',EGSC:'Cambridge',EGSS:'London Stansted',
-  EGXT:'RAF Cottesmore',EGXG:'RAF Church Fenton',EGYD:'RAF Cranwell',
-  EGDL:'RAF Lyneham',EGDG:'RAF Shawbury',EGPK:'RAF Prestwick',
-  EGCC:'Manchester',EGCD:'Woodford',EGCN:'Doncaster Sheffield',
-  EGPF:'Glasgow',EGBB:'Birmingham',EGBV:'Cranfield',
-  'E307':'USAF E307','I/B EGUL':'Inbound RAF Lakenheath',
-};
- 
-const OPS_FULL = {
-  ACC:'Air Combat Command',AMC:'Air Mobility Command',USAFE:'US Air Forces Europe',
-  ANG:'Air National Guard',AFRC:'Air Force Reserve Cmd',AFSOC:'AF Special Ops',
-  AFRES:'Air Force Reserve',AETC:'Air Education & Training',AFMC:'AF Materiel Cmd',
-  PACAF:'Pacific Air Forces',USN:'US Navy',USMC:'US Marine Corps',
-  USAr:'US Army',USAR:'US Army Reserve',USCG:'US Coast Guard',
-  RAF:'Royal Air Force',AAC:'Army Air Corps',RN:'Royal Navy',RM:'Royal Marines',
-  RAAF:'Royal Australian AF',GAF:'German Air Force',BAF:'Belgian Air Force',
-  FAF:'French Air Force',IAF:'Italian Air Force',RNAF:'Royal Netherlands AF',
-};
- 
-const TYPE_COLORS = {
-  'A-10':'#4ade80','A-6':'#86efac','B-1':'#f87171','B-2':'#dc2626','B-52':'#ef4444',
-  'C-17':'#2563eb','C-130':'#34d399','C-135':'#10b981','C-141':'#047857',
-  'E-3':'#f472b6','E-4':'#ec4899','F-14':'#fb923c','F-15':'#f97316','F-16':'#ea580c',
-  'F-18':'#c2410c','F-22':'#9a3412','F-35':'#7c2d12','F-117':'#d4d4d4',
-  'H-47':'#7c3aed','H-60':'#4c1d95','H-64':'#3b0764','U-2':'#e2e8f0',
-  'Tornado':'#ff6b35','Typhoon':'#ff8c42','Harrier':'#ff4d6d','Jaguar':'#c77dff',
-  'Hawk':'#9d4edd','Nimrod':'#48cae4','SeaKing':'#0096c7','Lynx':'#0077b6',
-  'Merlin':'#023e8a','Sentry':'#e9c46a','VC-10':'#06d6a0','A400':'#1b9aaa',
-  'Mirage':'#6366f1','Rafale':'#4f46e5','F-4':'#c65d00','F-5':'#d97706',
-  'MiG-21':'#ef4444','MiG-29':'#dc2626','Gripen':'#22d3ee','Viggen':'#06b6d4',
-};
- 
-const FIELD_META = [
-  {key:'registration', label:'Serial / Registration',  required:true,  hint:'e.g. ZE413 or 86-0263'},
-  {key:'callsign',     label:'Callsign',               required:false, hint:'e.g. PANTHER 1'},
-  {key:'aircraft_type',label:'Aircraft Type (family)', required:true,  hint:'e.g. Tornado, F-16'},
-  {key:'type',         label:'Variant / Sub-type',     required:false, hint:'e.g. Tornado GR4'},
-  {key:'tail_code',    label:'Tail Code',              required:false, hint:'e.g. LN, SP'},
-  {key:'colour',       label:'Colour / Markings',      required:false, hint:'e.g. grey, bk/w'},
-  {key:'ops',          label:'Service / Command',      required:false, hint:'e.g. RAF, USAFE, GAF'},
-  {key:'detachment',   label:'Unit / Squadron',        required:false, hint:'e.g. 9-SQN, 492-FS'},
-  {key:'location',     label:'Home Base',              required:false, hint:'e.g. Lakenheath'},
-  {key:'spot',         label:'Airfield ICAO (Spotted)',required:true,  hint:'e.g. EGVA, EGUN', upper:true},
-  {key:'date',         label:'Date Spotted',           required:true,  hint:'YYYY-MM-DD', type:'date'},
-  {key:'name',         label:'Notes / Named Aircraft', required:false, hint:'e.g. Spirit of Missouri'},
-];
- 
-// ══════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
- 
-let profile    = null;
-let records    = [];
-let totalCount = 0;
-let cursor     = 0;
-let hasMore    = true;
-let isLoading  = false;
-let isLoadingMore = false;
-let selectedId = null;
-let editRecord = null;
-let adminTab   = 'pending';
- 
-let knownTypes     = [];
-let knownSpots     = [];
-let knownOps       = [];
-let knownCountries = [];
- 
-let searchTimer   = null;
-let dupTimer      = null;
-let dupBlocked    = false;
- 
-// ── Filters state ──
-const filters = { service:'', country:'', type:'', spot:'', ops:'', search:'' };
- 
-// ══════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════
-function show(id)  { document.getElementById(id).classList.add('active'); }
-function hide(id)  { document.getElementById(id).classList.remove('active'); }
-function showEl(el){ if(typeof el==='string') el=document.getElementById(el); el.style.display=''; }
-function hideEl(el){ if(typeof el==='string') el=document.getElementById(el); el.style.display='none'; }
-function el(id)    { return document.getElementById(id); }
- 
-function typeBadge(type) {
-  if(!type) return '';
-  const c = TYPE_COLORS[type] || '#94a3b8';
-  return `<span class="type-badge" style="background:${c}1a;color:${c};border-color:${c}55">${esc(type)}</span>`;
-}
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function svcColor(r) {
-  return r.service==='UK'?'#4ade80':r.service==='WORLD'?'#a78bfa':'#7dd3fc';
-}
-function rowClass(r) {
-  return r.service==='UK'?'uk-row':r.service==='WORLD'?'wld-row':'us-row';
-}
-function formatSpot(spot) {
-  if(!spot) return '';
-  const name = SPOT_NAMES[spot]||'';
-  return name ? `<span style="color:var(--amber);font-weight:800">${esc(spot)}</span><div class="spot-name">${esc(name)}</div>`
-              : `<span style="color:var(--amber);font-weight:800">${esc(spot)}</span>`;
-}
-function buildFiltersObj() {
-  return {
-    search:   filters.search.trim()||undefined,
-    aircraft_type: filters.type||undefined,
-    spot:     filters.spot||undefined,
-    ops:      filters.ops||undefined,
-    country:  filters.country||undefined,
-    service:  filters.service||undefined,
+async function sbFetch(path, options={}) {
+  const headers = {
+    'apikey': SB_KEY,
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY),
+    ...options.headers
   };
+  const res = await fetch(SB_URL + path, { ...options, headers });
+  const text = await res.text();
+  const json = text ? JSON.parse(text) : {};
+  if (!res.ok) throw new Error(json.error_description || json.message || json.msg || 'Request failed');
+  return json;
 }
  
-// ══════════════════════════════════════════════════
-// VIEWS
-// ══════════════════════════════════════════════════
-function showView(name) {
-  ['auth-view','pending-view','db-view','admin-view'].forEach(v => {
-    v === name+'-view' ? show(v) : hide(v);
+async function sbSignIn(email, password) {
+  const data = await sbFetch('/auth/v1/token?grant_type=password', {
+    method: 'POST', body: JSON.stringify({ email, password })
   });
-}
- 
-// ══════════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════════
-function authMsg(type, msg) {
-  hideEl('auth-error'); hideEl('auth-success');
-  if(!msg) return;
-  const id = type==='error'?'auth-error':'auth-success';
-  el(id).textContent = msg;
-  showEl(id);
-}
- 
-async function loadProfile() {
-  const { data: { user } } = await sb.auth.getUser();
-  if(!user) return null;
-  const { data, error } = await sb.from('profiles').select('*').eq('id',user.id).single();
-  if(error) throw error;
+  SB_TOKEN = data.access_token;
+  currentUser = data.user;
+  sessionStorage.setItem('sb_token', SB_TOKEN);
+  sessionStorage.setItem('sb_user', JSON.stringify(currentUser));
   return data;
 }
  
-async function handleLogin() {
-  authMsg('','');
-  const email = el('login-email').value.trim();
-  const pass  = el('login-pass').value;
-  if(!email||!pass) return authMsg('error','Please enter your email and password.');
-  el('login-btn').textContent = 'SIGNING IN…';
-  try {
-    await sb.auth.signInWithPassword({email, password:pass});
-    // onAuthStateChange will handle the rest
-  } catch(e) {
-    authMsg('error', e.message||'Login failed.');
-    el('login-btn').textContent = 'SIGN IN';
+async function sbSignOut() {
+  try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
+  SB_TOKEN = null; currentUser = null;
+  sessionStorage.removeItem('sb_token');
+  sessionStorage.removeItem('sb_user');
+}
+ 
+async function sbGetSession() {
+  const token = sessionStorage.getItem('sb_token');
+  const user  = sessionStorage.getItem('sb_user');
+  if (token && user) { SB_TOKEN = token; currentUser = JSON.parse(user); return true; }
+  return false;
+}
+ 
+// Fetch ALL records with pagination (Supabase returns max 1000 per request)
+async function sbSelectAll(table) {
+  let all = [], from = 0, limit = 1000;
+  while (true) {
+    const res = await fetch(
+      SB_URL + '/rest/v1/' + table + '?order=registration.asc&limit=' + limit + '&offset=' + from,
+      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY), 'Range-Unit': 'items' } }
+    );
+    const batch = await res.json();
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    all = all.concat(batch);
+    if (batch.length < limit) break;
+    from += limit;
   }
+  return all;
 }
  
-async function handleRegister() {
-  authMsg('','');
-  const name = el('reg-name').value.trim();
-  const email= el('reg-email').value.trim();
-  const pass = el('reg-pass').value;
-  const conf = el('reg-conf').value;
-  if(!name)            return authMsg('error','Please enter your full name.');
-  if(!email)           return authMsg('error','Please enter your email address.');
-  if(pass.length<8)    return authMsg('error','Password must be at least 8 characters.');
-  if(pass!==conf)      return authMsg('error','Passwords do not match.');
-  el('register-btn').textContent='REQUESTING…';
-  try {
-    await sb.auth.signUp({email, password:pass, options:{data:{full_name:name}}});
-    authMsg('success','Account created! Awaiting admin approval before you can sign in.');
-    el('register-form').style.display='none';
-    el('login-form').style.display='';
-  } catch(e) {
-    authMsg('error', e.message||'Registration failed.');
-  } finally {
-    el('register-btn').textContent='REQUEST ACCESS';
-  }
-}
- 
-// ══════════════════════════════════════════════════
-// SUPABASE DATA
-// ══════════════════════════════════════════════════
-async function fetchBatch(page) {
-  const f = buildFiltersObj();
-  let q = sb.from('sightings')
-    .select('*',{count:'exact'})
-    .order('registration',{ascending:true})
-    .range(page*BATCH, (page+1)*BATCH-1);
- 
-  if(f.search) {
-    q = q.or([
-      'registration','callsign','type','aircraft_type','detachment','ops','spot','country'
-    ].map(c=>`${c}.ilike.%${f.search}%`).join(','));
-  }
-  if(f.aircraft_type) q = q.eq('aircraft_type', f.aircraft_type);
-  if(f.spot)          q = q.eq('spot', f.spot);
-  if(f.ops)           q = q.eq('ops', f.ops);
-  if(f.country)       q = q.eq('country', f.country);
-  if(f.service !== undefined && f.service !== '') {
-    if(f.service==='US')        q = q.not('service','in','("UK","WORLD")');
-    else if(f.service==='UK')   q = q.eq('service','UK');
-    else if(f.service==='WORLD')q = q.eq('service','WORLD');
-  }
-  const { data, error, count } = await q;
-  if(error) throw error;
-  return { data: data||[], count: count||0 };
-}
- 
-async function checkDuplicate(reg) {
-  const { data } = await sb.from('sightings')
-    .select('id,registration,type,aircraft_type,spot,date,country')
-    .ilike('registration', reg.trim())
-    .limit(5);
-  return data||[];
-}
- 
-// ══════════════════════════════════════════════════
-// LOAD & RENDER
-// ══════════════════════════════════════════════════
-async function loadFirst() {
-  isLoading=true; cursor=0; records=[]; selectedId=null;
-  el('loading-msg').style.display='';
-  el('empty-msg').style.display='none';
-  el('table-body').innerHTML='';
-  el('card-list').innerHTML='';
-  el('all-loaded-msg').style.display='none';
-  el('load-more-indicator').style.display='none';
-  closeDetailPanel();
-  try {
-    const { data, count } = await fetchBatch(0);
-    totalCount = count;
-    records = data;
-    cursor = data.length;
-    hasMore = cursor < count;
-    el('total-count').textContent = count.toLocaleString();
-    updateCounter();
-    buildKnownLists(data);
-    renderRecords(data, false);
-  } catch(e) {
-    el('db-error').textContent = 'Error: '+e.message;
-    el('db-error').style.display='';
-  } finally {
-    isLoading=false;
-    el('loading-msg').style.display='none';
-    if(records.length===0) el('empty-msg').style.display='';
-    updateScrollEnd();
-  }
-}
- 
-async function loadMore() {
-  if(isLoadingMore||!hasMore||isLoading) return;
-  isLoadingMore=true;
-  el('load-more-indicator').style.display='';
-  try {
-    const page = Math.floor(cursor/BATCH);
-    const { data } = await fetchBatch(page);
-    if(!data.length){ hasMore=false; updateScrollEnd(); return; }
-    records.push(...data);
-    cursor+=data.length;
-    hasMore = cursor < totalCount;
-    renderRecords(data, true);
-    updateCounter();
-    updateScrollEnd();
-  } catch(e) {
-    el('db-error').textContent='Error loading more: '+e.message;
-    el('db-error').style.display='';
-  } finally {
-    isLoadingMore=false;
-    el('load-more-indicator').style.display='none';
-  }
-}
- 
-function updateCounter() {
-  el('loaded-count').textContent = records.length.toLocaleString();
-  el('total-label').textContent  = totalCount>0 ? ` / ${totalCount.toLocaleString()}` : '';
-}
- 
-function updateScrollEnd() {
-  el('all-loaded-msg').style.display = (!hasMore && records.length>0) ? '' : 'none';
-  el('all-loaded-msg').textContent = `── ALL ${totalCount.toLocaleString()} RECORDS LOADED ──`;
-}
- 
-function buildKnownLists(data) {
-  if(knownTypes.length) return; // only build once
-  knownTypes     = [...new Set(data.map(r=>r.aircraft_type).filter(Boolean))].sort();
-  knownSpots     = [...new Set(data.map(r=>r.spot).filter(Boolean))].sort();
-  knownOps       = [...new Set(data.map(r=>r.ops).filter(Boolean))].sort();
-  knownCountries = [...new Set(data.map(r=>r.country).filter(Boolean))].sort();
-  populateFilterOptions();
-  buildDatalistOptions();
-}
- 
-function populateFilterOptions() {
-  const add = (selId, arr, fmtFn) => {
-    const sel = el(selId);
-    arr.forEach(v => {
-      const o = document.createElement('option');
-      o.value = v; o.textContent = fmtFn ? fmtFn(v) : v;
-      sel.appendChild(o);
-    });
-  };
-  add('f-country', knownCountries);
-  add('f-type',    knownTypes);
-  add('f-spot',    knownSpots, v => SPOT_NAMES[v] ? `${v} — ${SPOT_NAMES[v]}` : v);
-  add('f-ops',     knownOps);
-}
- 
-function buildDatalistOptions() {
-  const lists = {
-    'dl-types': knownTypes,
-    'dl-spots': knownSpots.map(s => ({value:s, label: SPOT_NAMES[s]?`${s} — ${SPOT_NAMES[s]}`:s})),
-    'dl-ops':   knownOps.map(o => ({value:o, label: OPS_FULL[o]?`${o} — ${OPS_FULL[o]}`:o})),
-  };
-  Object.entries(lists).forEach(([id, items]) => {
-    let dl = document.getElementById(id);
-    if(!dl){ dl=document.createElement('datalist'); dl.id=id; document.body.appendChild(dl); }
-    dl.innerHTML='';
-    items.forEach(item => {
-      const o=document.createElement('option');
-      if(typeof item==='string'){ o.value=item; } else { o.value=item.value; o.label=item.label; }
-      dl.appendChild(o);
-    });
+async function sbInsert(table, row) {
+  return await sbFetch('/rest/v1/' + table, {
+    method: 'POST', body: JSON.stringify(row),
+    headers: { 'Prefer': 'return=representation' }
   });
 }
  
-// ══════════════════════════════════════════════════
-// RENDER ROWS
-// ══════════════════════════════════════════════════
-function renderRecords(data, append) {
-  const tbody = el('table-body');
-  const cards = el('card-list');
-  if(!append){ tbody.innerHTML=''; cards.innerHTML=''; }
+async function sbInsertBatch(table, rows) {
+  return await sbFetch('/rest/v1/' + table, {
+    method: 'POST', body: JSON.stringify(rows),
+    headers: { 'Prefer': 'return=minimal' }
+  });
+}
  
-  data.forEach(r => {
-    const rc = rowClass(r);
-    const sc = svcColor(r);
-    const tc = TYPE_COLORS[r.aircraft_type]||'#64748b';
+async function sbUpdate(table, id, row) {
+  return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, {
+    method: 'PATCH', body: JSON.stringify(row),
+    headers: { 'Prefer': 'return=representation' }
+  });
+}
  
-    // Desktop row
-    const tr = document.createElement('tr');
-    tr.className = rc;
-    tr.dataset.id = r.id;
-    tr.innerHTML = `
-      <td class="reg-cell">${esc(r.registration)}</td>
-      <td>${typeBadge(r.aircraft_type)}</td>
-      <td class="variant-cell">${esc(r.type||'')}</td>
-      <td class="${r.callsign&&r.callsign!=='?'?'call-cell':'call-cell dim'}">${r.callsign&&r.callsign!=='?'?esc(r.callsign):'—'}</td>
-      <td class="tc-cell">${esc(r.tail_code||'')}</td>
-      <td><span class="svc-code" style="color:${sc}">${esc(r.ops||'')}</span></td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text3)" title="${esc(r.detachment||'')}">${esc(r.detachment||'')}</td>
-      <td class="country-cell" style="color:${sc}">${esc(r.country||'')}</td>
-      <td class="spot-cell">${formatSpot(r.spot)}</td>
-      <td class="date-cell">${esc(r.date||'')}</td>`;
-    tr.addEventListener('click',()=>selectRecord(r, tr));
-    tbody.appendChild(tr);
+async function sbDelete(table, id) {
+  return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, { method: 'DELETE' });
+}
  
-    // Mobile card
-    const card = document.createElement('div');
-    card.className = `record-card ${rc}`;
-    card.dataset.id = r.id;
-    card.innerHTML = `
-      <div class="card-top">
-        <span class="card-reg">${esc(r.registration)}</span>
-        ${typeBadge(r.aircraft_type)}
-        <span class="card-spot">${esc(r.spot||'')}</span>
-      </div>
-      <div class="card-bot">
-        <span class="card-type-text">${esc(r.type||'')}</span>
-        <span style="color:${sc};font-size:11px;font-weight:700">${esc(r.ops||'')}</span>
-        ${r.country?`<span style="color:${sc};font-size:11px">${esc(r.country)}</span>`:''}
-        <span class="card-date">${esc(r.date||'')}</span>
-      </div>
-      <div class="card-detail" id="cd-${esc(r.id)}">
-        <div class="detail-grid">
-          ${[
-            ['CALLSIGN',  r.callsign&&r.callsign!=='?'?r.callsign:'—','#cbd5e1'],
-            ['TAIL CODE', r.tail_code||'—','#64748b'],
-            ['UNIT/SQN',  r.detachment||'—','#94a3b8'],
-            ['HOME BASE', r.location||'—','#94a3b8'],
-            ['SERVICE',   (r.ops||'')+(OPS_FULL[r.ops]?' — '+OPS_FULL[r.ops]:''),sc],
-            ['SPOTTED AT',r.spot?(r.spot+(SPOT_NAMES[r.spot]?' — '+SPOT_NAMES[r.spot]:'')):' — ','#fbbf24'],
-          ].map(([l,v,c])=>`
-            <div class="detail-item" style="border-color:${tc}33">
-              <div class="detail-label">${l}</div>
-              <div class="detail-val" style="color:${c}">${esc(v)}</div>
-            </div>`).join('')}
+// ── App state ─────────────────────────────────────────────────────
+let db=[], filtered=[], page=0, sortBy='reg', expandedId=null;
+const PAGE_SIZE = 25;
+ 
+// ── Toast ─────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  void el.offsetWidth;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+ 
+// ── Auth ──────────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!email || !pass) { err.textContent='Please enter email and password'; err.style.display='block'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
+  try {
+    await sbSignIn(email, pass);
+    await initApp();
+  } catch(e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'SIGN IN';
+  }
+}
+ 
+async function doLogout() {
+  await sbSignOut();
+  db = []; filtered = [];
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'SIGN IN';
+}
+ 
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+ 
+// ── App init ──────────────────────────────────────────────────────
+async function initApp() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  document.getElementById('user-pill').textContent = currentUser.email.split('@')[0].toUpperCase();
+  document.getElementById('record-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading database...</div>';
+ 
+  try {
+    const rows = await sbSelectAll('sightings');
+    db = rows.map(r => ({
+      id: r.id,
+      airline: r.airline||'', registration: r.registration||'',
+      type: r.type||'', ops: r.ops||'', spot: r.spot||'',
+      date: r.date||'', country: r.country||'',
+      _mine: r.user_id === currentUser.id,
+      _base: r.is_base === true,
+      _cloud: true,
+    }));
+  } catch(e) {
+    toast('Failed to load database: ' + e.message, 'error');
+    db = [];
+  }
+ 
+  populateFilters();
+  applyFilters();
+}
+ 
+// ── Filters ───────────────────────────────────────────────────────
+function populateFilters() {
+  const countries = [...new Set(db.map(r=>r.country).filter(Boolean))].sort();
+  const spots     = [...new Set(db.map(r=>r.spot).filter(Boolean))].sort();
+  document.getElementById('filter-country').innerHTML =
+    '<option value="">Country</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('filter-spot').innerHTML =
+    '<option value="">Airport</option>' + spots.map(s=>`<option value="${s}">${s}</option>`).join('');
+  document.getElementById('f-country').innerHTML =
+    '<option value="">Select country...</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
+}
+ 
+function applyFilters() {
+  const q       = document.getElementById('search-box').value.toLowerCase().trim();
+  const country = document.getElementById('filter-country').value;
+  const spot    = document.getElementById('filter-spot').value;
+  filtered = db.filter(r => {
+    if (q && !Object.values(r).some(v => String(v||'').toLowerCase().includes(q))) return false;
+    if (country && r.country !== country) return false;
+    if (spot && r.spot !== spot) return false;
+    return true;
+  });
+  filtered.sort((a,b) => {
+    if (sortBy==='reg')     return (a.registration||'').localeCompare(b.registration||'');
+    if (sortBy==='regdesc') return (b.registration||'').localeCompare(a.registration||'');
+    if (sortBy==='date')    return (b.date||'').localeCompare(a.date||'');
+    if (sortBy==='airline') return (a.airline||'').localeCompare(b.airline||'');
+    return 0;
+  });
+  page = 0;
+  renderStatsBar(q, country, spot);
+  renderList();
+}
+ 
+function onSort() { sortBy = document.getElementById('sort-by').value; applyFilters(); }
+ 
+function renderStatsBar(q, country, spot) {
+  const airlines = new Set(filtered.map(r=>r.airline).filter(Boolean)).size;
+  const spots2   = new Set(filtered.map(r=>r.spot).filter(Boolean)).size;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${filtered.length}</div><div class="stat-label">SIGHTINGS</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${airlines}</div><div class="stat-label">AIRLINES</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${spots2}</div><div class="stat-label">AIRPORTS</div></div>`;
+  const af = document.getElementById('active-filters');
+  if (!q && !country && !spot) { af.style.display='none'; return; }
+  af.style.display = 'flex';
+  let h = '';
+  if (country) h += `<span class="filter-tag" onclick="clearFilter('country')">${country} ✕</span>`;
+  if (spot)    h += `<span class="filter-tag" onclick="clearFilter('spot')">${spot} ✕</span>`;
+  if (q)       h += `<span class="filter-tag" onclick="clearFilter('search')">"${q}" ✕</span>`;
+  h += `<button class="clear-btn" onclick="clearAll()">Clear all</button>`;
+  af.innerHTML = h;
+}
+ 
+function clearFilter(t) {
+  if(t==='country') document.getElementById('filter-country').value='';
+  if(t==='spot')    document.getElementById('filter-spot').value='';
+  if(t==='search')  document.getElementById('search-box').value='';
+  applyFilters();
+}
+function clearAll() {
+  ['filter-country','filter-spot','search-box'].forEach(id => document.getElementById(id).value='');
+  applyFilters();
+}
+ 
+function fmt(v) { return v || '—'; }
+ 
+function renderList() {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
+  const list  = document.getElementById('record-list');
+  if (!slice.length) {
+    list.innerHTML = '<div class="empty-state">NO SIGHTINGS FOUND</div>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+  list.innerHTML = slice.map(rec => {
+    const exp     = rec.id === expandedId;
+    const canEdit = rec._mine && !rec._base;
+    return `<div class="record-card${exp?' expanded':''}${rec._mine?' mine':''}" onclick="toggleCard('${rec.id}')">
+      <div class="record-top">
+        <div class="record-left">
+          <div class="reg-row">
+            <span class="record-reg">${rec.registration}</span>
+            ${rec.ops ? `<span class="ops-badge">${rec.ops}</span>` : ''}
+            ${rec._mine && !rec._base ? '<span class="my-badge">MY LOG</span>' : ''}
+          </div>
+          <div class="record-airline">${fmt(rec.airline)}</div>
         </div>
-        ${profile&&(profile.role==='editor'||profile.role==='admin')?
-          `<button class="edit-btn" style="border:1px solid ${tc};background:${tc}22;color:${tc}"
-            onclick="event.stopPropagation();openEditModal(records.find(x=>x.id==='${esc(r.id)}'))">Edit Record</button>`:''}
-      </div>`;
-    card.addEventListener('click',()=>selectCard(r, card));
-    cards.appendChild(card);
-  });
-}
- 
-// ══════════════════════════════════════════════════
-// SELECTION
-// ══════════════════════════════════════════════════
-function selectRecord(r, tr) {
-  if(selectedId===r.id){ deselectAll(); return; }
-  deselectAll();
-  selectedId=r.id;
-  tr.classList.add('sel-row');
-  showDetailPanel(r);
-}
- 
-function selectCard(r, card) {
-  if(selectedId===r.id){
-    deselectAll(); return;
-  }
-  deselectAll();
-  selectedId=r.id;
-  card.classList.add('sel-row');
-  card.style.borderLeftColor=TYPE_COLORS[r.aircraft_type]||'#64748b';
-  const det=document.getElementById('cd-'+r.id);
-  if(det) det.classList.add('open');
-}
- 
-function deselectAll() {
-  selectedId=null;
-  document.querySelectorAll('.sel-row').forEach(e=>{
-    e.classList.remove('sel-row');
-    e.style.borderLeftColor='';
-  });
-  document.querySelectorAll('.card-detail.open').forEach(e=>e.classList.remove('open'));
-  closeDetailPanel();
-}
- 
-// ══════════════════════════════════════════════════
-// DETAIL PANEL (desktop)
-// ══════════════════════════════════════════════════
-function showDetailPanel(r) {
-  const panel = el('detail-panel');
-  const tc = TYPE_COLORS[r.aircraft_type]||'#64748b';
-  const sc = svcColor(r);
-  const isUK    = r.service==='UK';
-  const isWorld = r.service==='WORLD';
- 
-  panel.style.borderTopColor = tc;
- 
-  const canEdit = profile&&(profile.role==='editor'||profile.role==='admin');
- 
-  el('detail-top').innerHTML = `
-    <span style="color:${tc};font-weight:900;font-size:15px;font-family:var(--font-mono)">${esc(r.registration)}</span>
-    ${typeBadge(r.aircraft_type)}
-    <span style="color:var(--text2);font-size:11px">${esc(r.type||'')}</span>
-    ${isUK?`<span class="flag-badge" style="color:var(--green);border-color:#4ade8044">🇬🇧 UK</span>`:''}
-    ${isWorld?`<span class="flag-badge" style="color:var(--purple);border-color:#a78bfa44">🌍 ${esc(r.country||'')}</span>`:''}
-    ${!isUK&&!isWorld?`<span class="flag-badge" style="color:var(--blue);border-color:#7dd3fc44">🇺🇸 US</span>`:''}
-    ${r.name?`<span style="color:var(--amber);font-size:11px;font-style:italic">"${esc(r.name)}"</span>`:''}
-    ${canEdit?`<button onclick="openEditModal(records.find(x=>x.id==='${esc(r.id)}'))"
-      style="margin-left:auto;padding:5px 16px;border:1px solid ${tc};background:${tc}22;color:${tc};
-        cursor:pointer;font-size:11px;font-weight:800;font-family:var(--font-mono);border-radius:4px">Edit</button>`:''}`;
- 
-  el('detail-grid').innerHTML = [
-    ['SERIAL/REG',   r.registration,                                           '#f1f5f9'],
-    ['CALLSIGN',     r.callsign&&r.callsign!=='?'?r.callsign:'—',             '#cbd5e1'],
-    ['VARIANT',      r.type||'—',                                              '#94a3b8'],
-    ['TAIL CODE',    r.tail_code||'—',                                         '#64748b'],
-    ['COLOUR/MARKS', r.colour||'—',                                            '#64748b'],
-    ['SERVICE/OPS',  (r.ops||'')+(OPS_FULL[r.ops]?' — '+OPS_FULL[r.ops]:''), sc],
-    ['UNIT/SQN',     r.detachment||'—',                                        '#94a3b8'],
-    ['COUNTRY',      r.country||'—',                                           sc],
-    ['SPOTTED AT',   r.spot?(r.spot+(SPOT_NAMES[r.spot]?' — '+SPOT_NAMES[r.spot]:'')):' — ','#fbbf24'],
-    ['DATE',         r.date||'—',                                              '#64748b'],
-  ].map(([l,v,c])=>`
-    <div class="dpanel-item" style="border-color:${tc}33">
-      <div class="dpanel-label">${l}</div>
-      <div class="dpanel-val" style="color:${c}">${esc(v)}</div>
-    </div>`).join('');
- 
-  panel.classList.add('open');
-}
- 
-function closeDetailPanel() {
-  el('detail-panel').classList.remove('open');
-  el('detail-top').innerHTML='';
-  el('detail-grid').innerHTML='';
-}
- 
-// ══════════════════════════════════════════════════
-// FORM BUILDER
-// ══════════════════════════════════════════════════
-function buildForm(containerId, data={}, previewIds={}) {
-  const container = el(containerId);
-  container.innerHTML='';
-  FIELD_META.forEach(f => {
-    const div = document.createElement('div');
-    div.className='form-field';
-    const val = data[f.key]||'';
-    const inputId = containerId+'-'+f.key;
-    let inputHtml = '';
-    if(f.type==='date') {
-      inputHtml = `<input class="form-input" type="date" id="${inputId}" value="${esc(val)}"/>`;
-    } else {
-      const dl = f.key==='aircraft_type'?'dl-types':f.key==='spot'?'dl-spots':f.key==='ops'?'dl-ops':'';
-      inputHtml = `<input class="form-input" type="text" id="${inputId}" value="${esc(val)}"
-        placeholder="${esc(f.hint)}"${dl?` list="${dl}"`:''}/>`;
-    }
-    div.innerHTML = `
-      <label for="${inputId}">${esc(f.label)}${f.required?'<span class="req">*</span>':''}</label>
-      ${inputHtml}
-      <div class="form-hint" id="${inputId}-hint">${esc(f.hint)}</div>
-      <div class="form-err-msg" id="${inputId}-err" style="display:none"></div>`;
-    container.appendChild(div);
- 
-    // Live preview update
-    const input = div.querySelector('input');
-    input.addEventListener('input', () => {
-      let v = input.value;
-      if(f.upper) { v=v.toUpperCase(); input.value=v; }
-      clearFieldError(inputId);
-      updatePreview(containerId, previewIds);
-    });
-  });
-}
- 
-function getFormData(containerId) {
-  const data={};
-  FIELD_META.forEach(f => {
-    const inp = el(containerId+'-'+f.key);
-    data[f.key] = inp ? inp.value.trim() : '';
-  });
-  return data;
-}
- 
-function validateForm(data, containerId) {
-  let ok=true;
-  FIELD_META.forEach(f=>{
-    if(f.required&&!data[f.key]){
-      showFieldError(containerId+'-'+f.key,'Required');
-      ok=false;
-    }
-    if(f.key==='date'&&data[f.key]&&!/^\d{4}-\d{2}-\d{2}$/.test(data[f.key])){
-      showFieldError(containerId+'-'+f.key,'Use YYYY-MM-DD');
-      ok=false;
-    }
-  });
-  return ok;
-}
- 
-function showFieldError(inputId, msg) {
-  el(inputId)?.classList.add('error');
-  const err=el(inputId+'-err');
-  if(err){ err.textContent=msg; err.style.display=''; }
-  const hint=el(inputId+'-hint');
-  if(hint) hint.style.display='none';
-}
- 
-function clearFieldError(inputId) {
-  el(inputId)?.classList.remove('error');
-  const err=el(inputId+'-err');
-  if(err) err.style.display='none';
-  const hint=el(inputId+'-hint');
-  if(hint) hint.style.display='';
-}
- 
-function updatePreview(containerId, ids) {
-  if(!ids.reg) return;
-  const reg  = el(containerId+'-registration')?.value||'';
-  const type = el(containerId+'-aircraft_type')?.value||'';
-  const spot = el(containerId+'-spot')?.value||'';
-  const date = el(containerId+'-date')?.value||'';
-  const c    = TYPE_COLORS[type]||'#64748b';
-  const preview = el(ids.preview);
-  if(preview) {
-    (reg||type)?preview.classList.add('visible'):preview.classList.remove('visible');
-  }
-  if(ids.reg)   el(ids.reg).textContent=reg||'—';
-  if(ids.badge) el(ids.badge).innerHTML=type?typeBadge(type):'';
-  if(ids.spot)  el(ids.spot).textContent=spot?(spot+(SPOT_NAMES[spot]?' — '+SPOT_NAMES[spot]:'')):'';
-  if(ids.date)  el(ids.date).textContent=date||'';
-  // Update modal border colour
-  const sheet=el(ids.sheet);
-  if(sheet&&type) sheet.style.borderColor=c;
-}
- 
-// ══════════════════════════════════════════════════
-// ADD MODAL
-// ══════════════════════════════════════════════════
-function openAddModal() {
-  buildForm('add-form-grid',{},{
-    preview:'add-preview',reg:'prev-reg',badge:'prev-badge',
-    spot:'prev-spot',date:'prev-date',sheet:'add-sheet'
-  });
-  el('add-status').style.display='none';
-  el('dup-banner').style.display='none';
-  el('dup-banner').className='dup-banner';
-  el('dup-banner').innerHTML='';
-  dupBlocked=false;
-  el('add-modal').classList.add('open');
-  // Wire dup check to registration field
-  const regInp=el('add-form-grid-registration');
-  if(regInp) regInp.addEventListener('input', onRegInput);
-}
- 
-function closeAddModal() {
-  el('add-modal').classList.remove('open');
-  el('add-preview').classList.remove('visible');
-  el('add-sheet').style.borderColor='var(--amber)';
-  dupBlocked=false;
-}
- 
-async function onRegInput(e) {
-  const val=e.target.value.trim();
-  clearTimeout(dupTimer);
-  if(!val){ hideDupBanner(); dupBlocked=false; return; }
-  showDupBanner('checking');
-  dupTimer=setTimeout(async()=>{
-    try{
-      const matches=await checkDuplicate(val);
-      if(matches.length) { showDupBanner('found',matches); dupBlocked=true; }
-      else               { showDupBanner('clear'); dupBlocked=false; }
-    }catch(_){ hideDupBanner(); dupBlocked=false; }
-  },500);
-}
- 
-function hideDupBanner(){
-  const b=el('dup-banner');
-  b.style.display='none'; b.className='dup-banner'; b.innerHTML='';
-}
-function showDupBanner(status,matches=[]){
-  const b=el('dup-banner');
-  if(status==='checking'){
-    b.className='dup-banner dup-checking';
-    b.innerHTML='<span class="spinner">⟳</span><span style="font-size:12px;color:var(--text4)">Checking database…</span>';
-  } else if(status==='clear'){
-    b.className='dup-banner dup-clear';
-    b.innerHTML='<span style="font-size:16px">✓</span><span style="font-size:12px;color:var(--green);font-weight:700">Registration not found — appears to be a new record.</span>';
-  } else {
-    b.className='dup-banner dup-found';
-    b.innerHTML=`
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <span style="font-size:18px">⚠</span>
-        <span style="font-size:13px;color:var(--red);font-weight:900;letter-spacing:0.06em">DUPLICATE REGISTRATION FOUND</span>
+        <div class="record-right">
+          <div class="record-spot">${fmt(rec.spot)}</div>
+          <div class="record-date">${fmt(rec.date)}</div>
+        </div>
       </div>
-      <p style="font-size:12px;color:#fca5a5;margin-bottom:10px;line-height:1.5">
-        This registration already exists. Check the records below before saving.
-      </p>
-      ${matches.map(m=>`
-        <div class="dup-match">
-          <span class="dup-match-reg">${esc(m.registration)}</span>
-          ${typeBadge(m.aircraft_type)}
-          <span style="color:var(--text2);font-size:11px">${esc(m.type||'')}</span>
-          ${m.spot?`<span style="color:var(--amber);font-size:11px;font-weight:700">${esc(m.spot)}</span>`:''}
-          ${m.date?`<span style="color:var(--text4);font-size:11px;margin-left:auto;font-family:var(--font-mono)">${esc(m.date)}</span>`:''}
-        </div>`).join('')}
-      <p style="font-size:11px;color:#7f1d1d;margin-top:10px">
-        Save is blocked. Use Edit on the existing record, or contact your administrator.
-      </p>`;
-  }
-  b.style.display='';
-}
- 
-async function saveAdd(andClose) {
-  if(dupBlocked){ showDupBanner('found',[]); return; }
-  const data=getFormData('add-form-grid');
-  if(!validateForm(data,'add-form-grid')) return;
-  el('add-save-more').disabled=true;
-  el('add-save-close').disabled=true;
-  const status=el('add-status');
-  status.textContent='Saving…'; status.style.color='var(--text4)'; status.style.display='';
-  try{
-    const { data:saved, error }=await sb.from('sightings')
-      .insert({...data, created_by:profile?.id})
-      .select().single();
-    if(error) throw error;
-    records.unshift(saved);
-    totalCount++;
-    el('total-count').textContent=totalCount.toLocaleString();
-    updateCounter();
-    // Prepend to table and cards
-    const tmp=document.createElement('table');
-    tmp.innerHTML=`<tbody>${renderOneRow(saved)}</tbody>`;
-    el('table-body').prepend(tmp.querySelector('tbody').firstChild);
-    const cdiv=document.createElement('div');
-    cdiv.innerHTML=renderOneCard(saved);
-    el('card-list').prepend(cdiv.firstChild);
-    if(andClose){ closeAddModal(); return; }
-    status.textContent='✓ Saved!'; status.style.color='var(--green)';
-    // Reset form
-    setTimeout(()=>{
-      buildForm('add-form-grid',{},{
-        preview:'add-preview',reg:'prev-reg',badge:'prev-badge',
-        spot:'prev-spot',date:'prev-date',sheet:'add-sheet'
-      });
-      const regInp=el('add-form-grid-registration');
-      if(regInp) regInp.addEventListener('input', onRegInput);
-      hideDupBanner(); dupBlocked=false;
-      el('add-preview').classList.remove('visible');
-      status.style.display='none';
-    },1200);
-  }catch(e){
-    status.textContent='Error: '+e.message; status.style.color='var(--red)';
-  }finally{
-    el('add-save-more').disabled=false;
-    el('add-save-close').disabled=false;
-  }
-}
- 
-function renderOneRow(r){
-  const sc=svcColor(r);
-  return `<tr class="${rowClass(r)}" data-id="${esc(r.id)}" onclick="selectRecord(records.find(x=>x.id==='${esc(r.id)}'),this)">
-    <td class="reg-cell">${esc(r.registration)}</td>
-    <td>${typeBadge(r.aircraft_type)}</td>
-    <td class="variant-cell">${esc(r.type||'')}</td>
-    <td class="${r.callsign&&r.callsign!=='?'?'call-cell':'call-cell dim'}">${r.callsign&&r.callsign!=='?'?esc(r.callsign):'—'}</td>
-    <td class="tc-cell">${esc(r.tail_code||'')}</td>
-    <td><span class="svc-code" style="color:${sc}">${esc(r.ops||'')}</span></td>
-    <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text3)">${esc(r.detachment||'')}</td>
-    <td class="country-cell" style="color:${sc}">${esc(r.country||'')}</td>
-    <td class="spot-cell">${formatSpot(r.spot)}</td>
-    <td class="date-cell">${esc(r.date||'')}</td>
-  </tr>`;
-}
- 
-function renderOneCard(r){
-  const sc=svcColor(r),tc=TYPE_COLORS[r.aircraft_type]||'#64748b';
-  const canEdit=profile&&(profile.role==='editor'||profile.role==='admin');
-  return `<div class="record-card ${rowClass(r)}" data-id="${esc(r.id)}" onclick="selectCard(records.find(x=>x.id==='${esc(r.id)}'),this)">
-    <div class="card-top"><span class="card-reg">${esc(r.registration)}</span>${typeBadge(r.aircraft_type)}<span class="card-spot">${esc(r.spot||'')}</span></div>
-    <div class="card-bot"><span class="card-type-text">${esc(r.type||'')}</span><span style="color:${sc};font-size:11px;font-weight:700">${esc(r.ops||'')}</span>${r.country?`<span style="color:${sc};font-size:11px">${esc(r.country)}</span>`:''}<span class="card-date">${esc(r.date||'')}</span></div>
-    <div class="card-detail" id="cd-${esc(r.id)}">
-      <div class="detail-grid">
-        ${[['CALLSIGN',r.callsign&&r.callsign!=='?'?r.callsign:'—','#cbd5e1'],['TAIL CODE',r.tail_code||'—','#64748b'],['UNIT/SQN',r.detachment||'—','#94a3b8'],['HOME BASE',r.location||'—','#94a3b8'],['SERVICE',(r.ops||'')+(OPS_FULL[r.ops]?' — '+OPS_FULL[r.ops]:''),sc],['SPOTTED AT',r.spot?(r.spot+(SPOT_NAMES[r.spot]?' — '+SPOT_NAMES[r.spot]:'')):' — ','#fbbf24']]
-          .map(([l,v,c])=>`<div class="detail-item" style="border-color:${tc}33"><div class="detail-label">${l}</div><div class="detail-val" style="color:${c}">${esc(v)}</div></div>`).join('')}
+      <div class="record-detail">
+        <div class="detail-grid">
+          <div><div class="detail-key">TYPE</div><div class="detail-val">${fmt(rec.type)}</div></div>
+          <div><div class="detail-key">COUNTRY</div><div class="detail-val">${fmt(rec.country)}</div></div>
+        </div>
+        ${canEdit ? `<div class="detail-actions">
+          <button class="btn-edit" onclick="editRecord(event,'${rec.id}')">EDIT</button>
+          <button class="btn-delete" onclick="deleteRecord(event,'${rec.id}')">🗑</button>
+        </div>` : ''}
       </div>
-      ${canEdit?`<button class="edit-btn" style="border:1px solid ${tc};background:${tc}22;color:${tc}" onclick="event.stopPropagation();openEditModal(records.find(x=>x.id==='${esc(r.id)}'))">Edit Record</button>`:''}
-    </div>
-  </div>`;
+    </div>`;
+  }).join('');
+  document.getElementById('pagination').innerHTML = totalPages<=1 ? '' : `
+    <button class="page-btn" onclick="changePage(-1)"${page===0?' disabled':''}>‹</button>
+    <span class="page-info">${page+1} / ${totalPages}</span>
+    <button class="page-btn" onclick="changePage(1)"${page>=totalPages-1?' disabled':''}>›</button>`;
 }
  
-// ══════════════════════════════════════════════════
-// EDIT MODAL
-// ══════════════════════════════════════════════════
-function openEditModal(r) {
-  if(!r) return;
-  editRecord=r;
-  const tc=TYPE_COLORS[r.aircraft_type]||'#64748b';
-  el('edit-modal-title').textContent=`Edit: ${r.registration}`;
-  el('edit-modal-title').style.color=tc;
-  el('edit-sheet').style.borderColor=tc;
-  buildForm('edit-form-grid', r, {
-    preview:'edit-preview',reg:'edit-prev-reg',badge:'edit-prev-badge',
-    spot:'edit-prev-spot',date:'edit-prev-date',sheet:'edit-sheet'
-  });
-  el('edit-status').style.display='none';
-  el('edit-modal').classList.add('open');
-  // Trigger preview immediately
-  updatePreview('edit-form-grid',{
-    preview:'edit-preview',reg:'edit-prev-reg',badge:'edit-prev-badge',
-    spot:'edit-prev-spot',date:'edit-prev-date',sheet:'edit-sheet'
-  });
+function toggleCard(id) { expandedId = expandedId===id ? null : id; renderList(); }
+function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
+ 
+// ── Log / Edit modal ──────────────────────────────────────────────
+function openModal(rec) {
+  document.getElementById('edit-id').value   = rec ? rec.id : '';
+  document.getElementById('modal-title').textContent = rec ? '✏️ EDIT SIGHTING' : '✈️ LOG NEW SIGHTING';
+  document.getElementById('f-reg').value     = rec ? rec.registration : '';
+  document.getElementById('f-airline').value = rec ? rec.airline : '';
+  document.getElementById('f-type').value    = rec ? rec.type : '';
+  document.getElementById('f-ops').value     = rec ? rec.ops : '';
+  document.getElementById('f-spot').value    = rec ? rec.spot : '';
+  document.getElementById('f-date').value    = rec ? rec.date : '';
+  document.getElementById('f-country').value = rec ? rec.country : '';
+  document.getElementById('modal').classList.add('open');
 }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
  
-function closeEditModal() {
-  el('edit-modal').classList.remove('open');
-  el('edit-preview').classList.remove('visible');
-  editRecord=null;
-}
- 
-async function saveEdit() {
-  if(!editRecord) return;
-  const data=getFormData('edit-form-grid');
-  if(!validateForm(data,'edit-form-grid')) return;
-  el('edit-save').disabled=true;
-  const status=el('edit-status');
-  status.textContent='Saving…'; status.style.color='var(--text4)'; status.style.display='';
-  try{
-    const { id:_id, created_at, created_by, ...fields } = editRecord;
-    const payload={...fields,...data, updated_by:profile?.id};
-    const { data:updated, error }=await sb.from('sightings')
-      .update(payload).eq('id',editRecord.id).select().single();
-    if(error) throw error;
-    // Update local array
-    const idx=records.findIndex(x=>x.id===editRecord.id);
-    if(idx>=0) records[idx]=updated;
-    // Update DOM
-    const tr=el('table-body').querySelector(`tr[data-id="${editRecord.id}"]`);
-    if(tr){ const tmp=document.createElement('table'); tmp.innerHTML=`<tbody>${renderOneRow(updated)}</tbody>`; tr.replaceWith(tmp.querySelector('tr')); }
-    const cd=el('card-list').querySelector(`[data-id="${editRecord.id}"]`);
-    if(cd){ const tmp=document.createElement('div'); tmp.innerHTML=renderOneCard(updated); cd.replaceWith(tmp.firstChild); }
-    // Refresh detail panel if this record is selected
-    if(selectedId===editRecord.id) showDetailPanel(updated);
-    closeEditModal();
-  }catch(e){
-    status.textContent='Error: '+e.message; status.style.color='var(--red)';
-    el('edit-save').disabled=false;
-  }
-}
- 
-// ══════════════════════════════════════════════════
-// FILTERS
-// ══════════════════════════════════════════════════
-let filtersOpen=false;
- 
-function toggleFilters() {
-  filtersOpen=!filtersOpen;
-  el('filter-grid').classList.toggle('open', filtersOpen);
-  updateFilterBtn();
-}
- 
-function countActiveFilters() {
-  return [filters.service,filters.country,filters.type,filters.spot,filters.ops]
-    .filter(v=>v).length;
-}
- 
-function updateFilterBtn() {
-  const n=countActiveFilters();
-  const btn=el('filter-toggle-btn');
-  btn.textContent=`Filters${n?` (${n})`:''}`;
-  btn.style.borderColor=n?'var(--amber)':'var(--border2)';
-  btn.style.background=n?'#f59e0b22':'transparent';
-  btn.style.color=n?'var(--amber)':'var(--text3)';
-  el('clear-filters-btn').style.display=n?'':'none';
-}
- 
-function applyFilter(key, val) {
-  filters[key]=val;
-  updateFilterBtn();
-  resetAndLoad();
-}
- 
-function clearAllFilters() {
-  filters.service=filters.country=filters.type=filters.spot=filters.ops='';
-  el('f-service').value=''; el('f-country').value='';
-  el('f-type').value=''; el('f-spot').value=''; el('f-ops').value='';
-  updateFilterBtn();
-  resetAndLoad();
-}
- 
-function resetAndLoad() {
-  deselectAll();
-  knownTypes=[];knownSpots=[];knownOps=[];knownCountries=[]; // rebuild on next load
-  loadFirst();
-}
- 
-// ══════════════════════════════════════════════════
-// INFINITE SCROLL
-// ══════════════════════════════════════════════════
-function initIntersectionObserver() {
-  const sentinel=el('scroll-sentinel');
-  const container=el('records-container');
-  const observer=new IntersectionObserver(entries=>{
-    if(entries[0].isIntersecting) loadMore();
-  },{root:container, rootMargin:'300px'});
-  observer.observe(sentinel);
-}
- 
-// ══════════════════════════════════════════════════
-// ADMIN
-// ══════════════════════════════════════════════════
-async function loadAdmin() {
-  showView('admin');
-  el('admin-msg').style.display='none';
-  await renderUserList();
-}
- 
-async function renderUserList() {
-  const { data, error } = await sb.from('profiles').select('*').order('created_at');
-  if(error){ el('admin-msg').textContent='Error: '+error.message; el('admin-msg').style.display=''; return; }
-  const users=data||[];
-  const pending=users.filter(u=>u.role==='pending');
-  const active =users.filter(u=>u.role!=='pending');
-  const list=adminTab==='pending'?pending:active;
- 
-  el('tab-pending').textContent=`PENDING${pending.length?` (${pending.length})`:''}`;
-  el('users-list').innerHTML = list.length===0
-    ? `<div class="empty-msg">${adminTab==='pending'?'No pending requests.':'No active users.'}</div>`
-    : list.map(u=>{
-        const roleColor=u.role==='admin'?'#a78bfa':u.role==='editor'?'#f59e0b':u.role==='viewer'?'#4ade80':'#ef4444';
-        const date=new Date(u.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-        return `<div class="user-card">
-          <div style="flex:1">
-            <div class="user-name">${esc(u.full_name||'(no name)')}</div>
-            <div class="user-email">${esc(u.email)}</div>
-            <div class="user-meta">Registered: ${date}</div>
-          </div>
-          <div class="user-actions">
-            <span class="type-badge" style="background:${roleColor}22;color:${roleColor};border-color:${roleColor}55">${u.role.toUpperCase()}</span>
-            ${u.id!==profile?.id?`
-              <select class="role-select" id="role-${esc(u.id)}" onchange="changeRole('${esc(u.id)}',this.value)">
-                <option ${u.role==='viewer'?'selected':''}>viewer</option>
-                <option ${u.role==='editor'?'selected':''}>editor</option>
-                <option ${u.role==='admin'?'selected':''}>admin</option>
-                <option ${u.role==='pending'?'selected':''}>pending</option>
-              </select>
-              ${u.role==='pending'?`<button class="approve-btn" onclick="approveUser('${esc(u.id)}')">Approve</button>`:''}`
-            :'<span style="font-size:10px;color:var(--text4)">(you)</span>'}
-          </div>
-        </div>`;
-      }).join('');
-}
- 
-async function approveUser(id) {
-  const sel=el('role-'+id);
-  const role=sel?sel.value:'viewer';
-  try{
-    await sb.rpc('approve_user',{target_id:id,new_role:role});
-    showAdminMsg('User approved as '+role+'.','success');
-    await renderUserList();
-  }catch(e){ showAdminMsg('Error: '+e.message,'error'); }
-}
- 
-async function changeRole(id, role) {
-  try{
-    await sb.rpc('approve_user',{target_id:id,new_role:role});
-    showAdminMsg('Role updated.','success');
-    await renderUserList();
-  }catch(e){ showAdminMsg('Error: '+e.message,'error'); }
-}
- 
-function showAdminMsg(msg, type) {
-  const m=el('admin-msg');
-  m.textContent=msg;
-  m.style.background=type==='success'?'#0a2a0a':'#2a0a0a';
-  m.style.color=type==='success'?'var(--green)':'var(--red)';
-  m.style.border=`1px solid ${type==='success'?'#4ade8066':'#ef444466'}`;
-  m.style.borderRadius='4px';
-  m.style.display='';
-  setTimeout(()=>m.style.display='none', 3000);
-}
- 
-// ══════════════════════════════════════════════════
-// EVENT WIRING
-// ══════════════════════════════════════════════════
-function wireEvents() {
-  // Auth
-  el('login-btn').onclick     = handleLogin;
-  el('register-btn').onclick  = handleRegister;
-  el('show-register').onclick = ()=>{ el('login-form').style.display='none'; el('register-form').style.display=''; authMsg('',''); };
-  el('show-login').onclick    = ()=>{ el('register-form').style.display='none'; el('login-form').style.display=''; authMsg('',''); };
-  el('login-email').onkeydown = e=>{ if(e.key==='Enter') el('login-pass').focus(); };
-  el('login-pass').onkeydown  = e=>{ if(e.key==='Enter') handleLogin(); };
-  el('reg-pass').onkeydown    = e=>{ if(e.key==='Enter') el('reg-conf').focus(); };
-  el('reg-conf').onkeydown    = e=>{ if(e.key==='Enter') handleRegister(); };
- 
-  // Pending
-  el('pending-signout').onclick = ()=>sb.auth.signOut();
- 
-  // DB header
-  el('add-btn').onclick      = openAddModal;
-  el('admin-btn').onclick    = loadAdmin;
-  el('db-signout').onclick   = ()=>sb.auth.signOut();
- 
-  // Filters
-  el('filter-toggle-btn').onclick = toggleFilters;
-  el('clear-filters-btn').onclick = clearAllFilters;
-  let searchTimer=null;
-  el('search-input').oninput = e=>{
-    clearTimeout(searchTimer);
-    searchTimer=setTimeout(()=>{ filters.search=e.target.value; resetAndLoad(); }, 400);
+async function saveRecord() {
+  const reg = document.getElementById('f-reg').value.trim();
+  if (!reg) { alert('Registration is required'); return; }
+  const editId = document.getElementById('edit-id').value;
+  const payload = {
+    user_id: currentUser.id,
+    registration: reg,
+    airline: document.getElementById('f-airline').value.trim(),
+    type: document.getElementById('f-type').value.trim(),
+    ops: document.getElementById('f-ops').value.trim().toUpperCase(),
+    spot: document.getElementById('f-spot').value.trim().toUpperCase(),
+    date: document.getElementById('f-date').value,
+    country: document.getElementById('f-country').value,
+    is_base: false,
   };
-  ['f-service','f-country','f-type','f-spot','f-ops'].forEach(id=>{
-    const key = id==='f-service'?'service':id==='f-country'?'country':
-                id==='f-type'?'aircraft_type':id==='f-spot'?'spot':'ops';
-    // special: service filter needs mapping
-    el(id).onchange = e=>{
-      if(id==='f-service'){
-        filters.service=e.target.value; // 'US','UK','WORLD',''
-      } else {
-        filters[key]=e.target.value;
-      }
-      updateFilterBtn();
-      resetAndLoad();
-    };
-  });
- 
-  // Add modal
-  el('add-modal-close').onclick = closeAddModal;
-  el('add-cancel').onclick      = closeAddModal;
-  el('add-save-more').onclick   = ()=>saveAdd(false);
-  el('add-save-close').onclick  = ()=>saveAdd(true);
-  el('add-modal').onclick       = e=>{ if(e.target===el('add-modal')) closeAddModal(); };
- 
-  // Edit modal
-  el('edit-modal-close').onclick = closeEditModal;
-  el('edit-cancel').onclick      = closeEditModal;
-  el('edit-save').onclick        = saveEdit;
-  el('edit-modal').onclick       = e=>{ if(e.target===el('edit-modal')) closeEditModal(); };
- 
-  // Admin
-  el('admin-to-db').onclick   = ()=>showView('db');
-  el('admin-signout').onclick = ()=>sb.auth.signOut();
-  el('tab-pending').onclick   = ()=>{ adminTab='pending'; el('tab-pending').classList.add('active'); el('tab-all').classList.remove('active'); renderUserList(); };
-  el('tab-all').onclick       = ()=>{ adminTab='all'; el('tab-all').classList.add('active'); el('tab-pending').classList.remove('active'); renderUserList(); };
- 
-  // Mobile title truncation
-  const setTitle=()=>{
-    el('header-title').textContent=window.innerWidth<640?'✈ MIL AVIATION DB':'✈ MILITARY AVIATION SPOTTERS DATABASE';
-  };
-  setTitle();
-  window.addEventListener('resize', setTitle);
-}
- 
-// ══════════════════════════════════════════════════
-// AUTH STATE LISTENER
-// ══════════════════════════════════════════════════
-async function onSession(session) {
-  if(!session){ showView('auth'); profile=null; return; }
   try {
-    profile = await loadProfile();
-    if(!profile || profile.role==='pending'){
-      showView('pending');
-      el('pending-email').textContent='Signed in as: '+(profile?.email||session.user.email);
-      return;
+    if (editId) { await sbUpdate('sightings', editId, payload); }
+    else { await sbInsert('sightings', payload); }
+    toast(editId ? '✅ Sighting updated' : '✅ Sighting logged');
+    closeModal();
+    await initApp();
+  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+}
+ 
+function editRecord(e, id) { e.stopPropagation(); const rec=db.find(r=>r.id===id); if(rec) openModal(rec); }
+ 
+async function deleteRecord(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this sighting?')) return;
+  try {
+    await sbFetch('/rest/v1/sightings?id=eq.' + id, { method: 'DELETE' });
+    toast('🗑 Sighting deleted');
+    await initApp();
+  } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
+}
+ 
+// ── Export CSV ────────────────────────────────────────────────────
+function exportCSV() {
+  const headers = ['Airline','Registration','Type','Ops','Spot','Date','Country'];
+  const rows = db.map(r => [r.airline,r.registration,r.type,r.ops,r.spot,r.date,r.country]
+    .map(v => { const s=String(v||''); return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s; })
+    .join(','));
+  const csv = [headers.join(','), ...rows].join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = `SpotterDB_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast(`✅ Exported ${db.length} records`);
+}
+ 
+// ── Import XLS ────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('import-modal').classList.add('open');
+  document.getElementById('import-status').innerHTML = '';
+  document.getElementById('import-file').value = '';
+  document.getElementById('import-country').value = '';
+}
+function closeImport() { document.getElementById('import-modal').classList.remove('open'); }
+ 
+async function runImport() {
+  const fileEl   = document.getElementById('import-file');
+  const country  = document.getElementById('import-country').value.trim().toUpperCase();
+  const statusEl = document.getElementById('import-status');
+ 
+  if (!fileEl.files.length) { statusEl.innerHTML = '<span style="color:var(--red)">Please select a file</span>'; return; }
+  if (!country) { statusEl.innerHTML = '<span style="color:var(--red)">Please enter a country name</span>'; return; }
+ 
+  const file = fileEl.files[0];
+  statusEl.innerHTML = '⟳ Reading file...';
+ 
+  try {
+    // Read file as text (CSV) or parse XLS/XLSX
+    const text = await readFileAsCSV(file);
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) throw new Error('File appears empty');
+ 
+    // Detect delimiter
+    const delim = lines[0].includes('\t') ? '\t' : ',';
+    const headers = lines[0].split(delim).map(h => h.trim().toLowerCase().replace(/[`']/g,''));
+ 
+    // Map columns flexibly
+    const colMap = {};
+    headers.forEach((h, i) => {
+      if (h.includes('airline')) colMap.airline = i;
+      if (h.includes('reg')) colMap.registration = i;
+      if (h.includes('type')) colMap.type = i;
+      if (h.includes('ops') || h === 'icao') colMap.ops = i;
+      if (h.includes('spot') || h === 'airport') colMap.spot = i;
+      if (h.includes('date')) colMap.date = i;
+    });
+ 
+    if (colMap.registration === undefined) throw new Error('Cannot find Registration column');
+ 
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(delim);
+      const reg = (cols[colMap.registration]||'').trim().replace(/^"|"$/g,'');
+      if (!reg) continue;
+      rows.push({
+        user_id: currentUser.id,
+        airline:      (cols[colMap.airline]||'').trim().replace(/^"|"$/g,''),
+        registration: reg,
+        type:         (cols[colMap.type]||'').trim().replace(/^"|"$/g,''),
+        ops:          (cols[colMap.ops]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
+        spot:         (cols[colMap.spot]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
+        date:         (cols[colMap.date]||'').trim().replace(/^"|"$/g,''),
+        country:      country,
+        is_base:      true,
+      });
     }
-    // Set up UI based on role
-    const roleColor = profile.role==='admin'?'#a78bfa':profile.role==='editor'?'#f59e0b':'#4ade80';
-    el('user-role-badge').textContent  = profile.role.toUpperCase();
-    el('user-role-badge').style.color  = roleColor;
-    const canEdit = profile.role==='editor'||profile.role==='admin';
-    const isAdmin = profile.role==='admin';
-    el('add-btn').style.display   = canEdit?'':'none';
-    el('admin-btn').style.display = isAdmin?'':'none';
-    showView('db');
-    initIntersectionObserver();
-    await loadFirst();
+ 
+    if (!rows.length) throw new Error('No valid records found');
+    statusEl.innerHTML = `⟳ Uploading ${rows.length} records to Supabase...`;
+ 
+    // Upload in batches of 200
+    const batchSize = 200;
+    let uploaded = 0;
+    for (let i = 0; i < rows.length; i += batchSize) {
+      const batch = rows.slice(i, i + batchSize);
+      await sbInsertBatch('sightings', batch);
+      uploaded += batch.length;
+      statusEl.innerHTML = `⟳ Uploaded ${uploaded} / ${rows.length}...`;
+    }
+ 
+    statusEl.innerHTML = `<span style="color:var(--success)">✅ Successfully imported ${rows.length} records!</span>`;
+    setTimeout(async () => { closeImport(); await initApp(); }, 1500);
+ 
   } catch(e) {
-    console.error(e);
-    showView('auth');
+    statusEl.innerHTML = `<span style="color:var(--red)">❌ Error: ${e.message}</span>`;
   }
 }
  
-// ══════════════════════════════════════════════════
-// BOOTSTRAP
-// ══════════════════════════════════════════════════
-wireEvents();
+async function readFileAsCSV(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    // For CSV files read as text; for XLS tell user to save as CSV
+    if (file.name.match(/\.csv$/i)) {
+      reader.readAsText(file);
+    } else {
+      reject(new Error('Please save your XLS file as CSV first (File → Save As → CSV in Excel/Numbers), then import the CSV'));
+    }
+  });
+}
  
-sb.auth.onAuthStateChange((_event, session) => onSession(session));
-sb.auth.getSession().then(({ data: { session } }) => onSession(session));
+// ── Tabs ──────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-list').style.display  = tab==='list'  ? 'block' : 'none';
+  document.getElementById('tab-stats').style.display = tab==='stats' ? 'block' : 'none';
+  if (tab==='stats') renderStats();
+}
+ 
+function renderStats() {
+  const airlines={}, spotsMap={}, countriesMap={};
+  db.forEach(r => {
+    if(r.airline) airlines[r.airline]=(airlines[r.airline]||0)+1;
+    if(r.spot)    spotsMap[r.spot]=(spotsMap[r.spot]||0)+1;
+    if(r.country) countriesMap[r.country]=(countriesMap[r.country]||0)+1;
+  });
+  const topA = Object.entries(airlines).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const topS = Object.entries(spotsMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const topC = Object.entries(countriesMap).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const tA = new Set(db.map(r=>r.airline).filter(Boolean)).size;
+  const tS = new Set(db.map(r=>r.spot).filter(Boolean)).size;
+  const myCount = db.filter(r=>r._mine && !r._base).length;
+  document.getElementById('tab-stats').innerHTML = `
+    <div class="stats-bar" style="margin-bottom:20px">
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${db.length}</div><div class="stat-label">SIGHTINGS</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${tA}</div><div class="stat-label">AIRLINES</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--success)">${tS}</div><div class="stat-label">AIRPORTS</div></div>
+    </div>
+    <div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span>
+      <span style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--accent)">${myCount}</span>
+    </div>
+    <div class="stats-section"><h3>TOP AIRLINES</h3>
+      ${topA.map(([n,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name">${n}</span><span class="bar-count" style="color:var(--warning)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topA[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>`).join('')}
+    </div>
+    <div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3>
+      ${topS.map(([s,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:'JetBrains Mono',monospace;font-weight:700">${s}</span><span class="bar-count" style="color:var(--success)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topS[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>`).join('')}
+    </div>
+    <div class="stats-section"><h3>BY COUNTRY</h3>
+      <div class="country-grid">${topC.map(([c,n])=>`<div class="country-item"><span class="country-name">${c}</span><span class="country-count">${n}</span></div>`).join('')}</div>
+    </div>`;
+}
+ 
+window.addEventListener('load', async () => {
+  const ok = await sbGetSession();
+  if (ok) await initApp();
+});
+ 
 </script>
 </body>
 </html>
