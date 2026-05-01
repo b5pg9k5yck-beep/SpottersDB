@@ -108,7 +108,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 </style>
 </head>
 <body>
- 
+
 <div id="screen-login" class="screen active">
   <div class="login-card">
     <div class="login-logo"><span class="icon">✈</span><h1>SPOTTER DB</h1><p>CIVIL AIRLINER DATABASE</p></div>
@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     <div class="msg-info">🔐 Authorised users only</div>
   </div>
 </div>
- 
+
 <div id="screen-app" class="screen">
   <div class="app-wrap">
     <div class="app-header">
@@ -138,7 +138,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
         <button class="tab-btn" onclick="switchTab('stats',this)">STATS</button>
       </div>
     </div>
- 
+
     <div class="content" id="tab-list">
       <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()"/>
       <div class="filters">
@@ -157,7 +157,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     <div class="content" id="tab-stats" style="display:none"></div>
   </div>
 </div>
- 
+
 <!-- Log/Edit Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal-card">
@@ -167,7 +167,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     </div>
     <div class="modal-fields">
       <input type="hidden" id="edit-id"/>
-      <div class="modal-field"><label>REGISTRATION *</label><input type="text" id="f-reg" placeholder="e.g. G-BOAC"/></div>
+      <div class="modal-field"><label>REGISTRATION *</label><input type="text" id="f-reg" placeholder="e.g. G-BOAC" oninput="checkRegDuplicate()" autocapitalize="characters"/></div>
       <div class="modal-field"><label>AIRLINE</label><input type="text" id="f-airline" placeholder="e.g. British Airways"/></div>
       <div class="modal-field"><label>AIRCRAFT TYPE</label><input type="text" id="f-type" placeholder="e.g. 747-436"/></div>
       <div class="modal-field"><label>ICAO CODE (OPS)</label><input type="text" id="f-ops" placeholder="e.g. BAW"/></div>
@@ -177,11 +177,12 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveRecord()">SAVE SIGHTING</button>
+      <button class="btn-save" id="save-btn" onclick="saveRecord()">SAVE SIGHTING</button>
     </div>
+    <div id="dup-warning" style="display:none;margin-top:14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--warning);line-height:1.6"></div>
   </div>
 </div>
- 
+
 <!-- Import Modal -->
 <div class="modal-overlay" id="import-modal">
   <div class="modal-card">
@@ -209,15 +210,15 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     <div class="import-status" id="import-status"></div>
   </div>
 </div>
- 
+
 <div class="toast" id="toast"></div>
 <script>
- 
+
 const SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg';
 let SB_TOKEN = null;
 let currentUser = null;
- 
+
 async function sbFetch(path, options={}) {
   const headers = {
     'apikey': SB_KEY,
@@ -231,7 +232,7 @@ async function sbFetch(path, options={}) {
   if (!res.ok) throw new Error(json.error_description || json.message || json.msg || 'Request failed');
   return json;
 }
- 
+
 async function sbSignIn(email, password) {
   const data = await sbFetch('/auth/v1/token?grant_type=password', {
     method: 'POST', body: JSON.stringify({ email, password })
@@ -242,21 +243,21 @@ async function sbSignIn(email, password) {
   sessionStorage.setItem('sb_user', JSON.stringify(currentUser));
   return data;
 }
- 
+
 async function sbSignOut() {
   try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
   SB_TOKEN = null; currentUser = null;
   sessionStorage.removeItem('sb_token');
   sessionStorage.removeItem('sb_user');
 }
- 
+
 async function sbGetSession() {
   const token = sessionStorage.getItem('sb_token');
   const user  = sessionStorage.getItem('sb_user');
   if (token && user) { SB_TOKEN = token; currentUser = JSON.parse(user); return true; }
   return false;
 }
- 
+
 // Fetch ALL records with pagination (Supabase returns max 1000 per request)
 async function sbSelectAll(table) {
   let all = [], from = 0, limit = 1000;
@@ -273,36 +274,36 @@ async function sbSelectAll(table) {
   }
   return all;
 }
- 
+
 async function sbInsert(table, row) {
   return await sbFetch('/rest/v1/' + table, {
     method: 'POST', body: JSON.stringify(row),
     headers: { 'Prefer': 'return=representation' }
   });
 }
- 
+
 async function sbInsertBatch(table, rows) {
   return await sbFetch('/rest/v1/' + table, {
     method: 'POST', body: JSON.stringify(rows),
     headers: { 'Prefer': 'return=minimal' }
   });
 }
- 
+
 async function sbUpdate(table, id, row) {
   return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, {
     method: 'PATCH', body: JSON.stringify(row),
     headers: { 'Prefer': 'return=representation' }
   });
 }
- 
+
 async function sbDelete(table, id) {
   return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, { method: 'DELETE' });
 }
- 
+
 // ── App state ─────────────────────────────────────────────────────
 let db=[], filtered=[], page=0, sortBy='reg', expandedId=null;
 const PAGE_SIZE = 25;
- 
+
 // ── Toast ─────────────────────────────────────────────────────────
 function toast(msg, type='success') {
   const el = document.getElementById('toast');
@@ -312,7 +313,7 @@ function toast(msg, type='success') {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 3000);
 }
- 
+
 // ── Auth ──────────────────────────────────────────────────────────
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -333,7 +334,7 @@ async function doLogin() {
     btn.textContent = 'SIGN IN';
   }
 }
- 
+
 async function doLogout() {
   await sbSignOut();
   db = []; filtered = [];
@@ -343,17 +344,17 @@ async function doLogout() {
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn').textContent = 'SIGN IN';
 }
- 
+
 document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
- 
+
 // ── App init ──────────────────────────────────────────────────────
 async function initApp() {
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('user-pill').textContent = currentUser.email.split('@')[0].toUpperCase();
   document.getElementById('record-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading database...</div>';
- 
+
   try {
     const rows = await sbSelectAll('sightings');
     db = rows.map(r => ({
@@ -369,11 +370,11 @@ async function initApp() {
     toast('Failed to load database: ' + e.message, 'error');
     db = [];
   }
- 
+
   populateFilters();
   applyFilters();
 }
- 
+
 // ── Filters ───────────────────────────────────────────────────────
 function populateFilters() {
   const countries = [...new Set(db.map(r=>r.country).filter(Boolean))].sort();
@@ -385,7 +386,7 @@ function populateFilters() {
   document.getElementById('f-country').innerHTML =
     '<option value="">Select country...</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
- 
+
 function applyFilters() {
   const q       = document.getElementById('search-box').value.toLowerCase().trim();
   const country = document.getElementById('filter-country').value;
@@ -407,9 +408,9 @@ function applyFilters() {
   renderStatsBar(q, country, spot);
   renderList();
 }
- 
+
 function onSort() { sortBy = document.getElementById('sort-by').value; applyFilters(); }
- 
+
 function renderStatsBar(q, country, spot) {
   const airlines = new Set(filtered.map(r=>r.airline).filter(Boolean)).size;
   const spots2   = new Set(filtered.map(r=>r.spot).filter(Boolean)).size;
@@ -427,7 +428,7 @@ function renderStatsBar(q, country, spot) {
   h += `<button class="clear-btn" onclick="clearAll()">Clear all</button>`;
   af.innerHTML = h;
 }
- 
+
 function clearFilter(t) {
   if(t==='country') document.getElementById('filter-country').value='';
   if(t==='spot')    document.getElementById('filter-spot').value='';
@@ -438,9 +439,9 @@ function clearAll() {
   ['filter-country','filter-spot','search-box'].forEach(id => document.getElementById(id).value='');
   applyFilters();
 }
- 
+
 function fmt(v) { return v || '—'; }
- 
+
 function renderList() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
@@ -485,10 +486,10 @@ function renderList() {
     <span class="page-info">${page+1} / ${totalPages}</span>
     <button class="page-btn" onclick="changePage(1)"${page>=totalPages-1?' disabled':''}>›</button>`;
 }
- 
+
 function toggleCard(id) { expandedId = expandedId===id ? null : id; renderList(); }
 function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
- 
+
 // ── Log / Edit modal ──────────────────────────────────────────────
 function openModal(rec) {
   document.getElementById('edit-id').value   = rec ? rec.id : '';
@@ -500,14 +501,40 @@ function openModal(rec) {
   document.getElementById('f-spot').value    = rec ? rec.spot : '';
   document.getElementById('f-date').value    = rec ? rec.date : '';
   document.getElementById('f-country').value = rec ? rec.country : '';
+  document.getElementById('dup-warning').style.display = 'none';
+  document.getElementById('save-btn').disabled = false;
   document.getElementById('modal').classList.add('open');
 }
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
- 
+
+function checkRegDuplicate() {
+  const reg = document.getElementById('f-reg').value.trim().toUpperCase();
+  const editId = document.getElementById('edit-id').value;
+  const dupWarn = document.getElementById('dup-warning');
+  const saveBtn = document.getElementById('save-btn');
+  if (!reg || editId) { dupWarn.style.display='none'; saveBtn.disabled=false; return; }
+  const existing = db.find(r => r.registration.toUpperCase() === reg);
+  if (existing) {
+    dupWarn.innerHTML = `⚠️ <strong>${reg}</strong> already exists — ${existing.airline||'Unknown airline'}, ${existing.type||'Unknown type'}, spotted at <strong>${existing.spot||'?'}</strong> on ${existing.date||'?'}.`;
+    dupWarn.style.display = 'block';
+    saveBtn.disabled = true;
+  } else {
+    dupWarn.style.display = 'none';
+    saveBtn.disabled = false;
+  }
+}
+
 async function saveRecord() {
-  const reg = document.getElementById('f-reg').value.trim();
+  const reg = document.getElementById('f-reg').value.trim().toUpperCase();
   if (!reg) { alert('Registration is required'); return; }
   const editId = document.getElementById('edit-id').value;
+
+  // Final duplicate guard
+  if (!editId) {
+    const existing = db.find(r => r.registration.toUpperCase() === reg);
+    if (existing) return;
+  }
+
   const payload = {
     user_id: currentUser.id,
     registration: reg,
@@ -527,9 +554,9 @@ async function saveRecord() {
     await initApp();
   } catch(e) { toast('Save failed: ' + e.message, 'error'); }
 }
- 
+
 function editRecord(e, id) { e.stopPropagation(); const rec=db.find(r=>r.id===id); if(rec) openModal(rec); }
- 
+
 async function deleteRecord(e, id) {
   e.stopPropagation();
   if (!confirm('Delete this sighting?')) return;
@@ -539,7 +566,7 @@ async function deleteRecord(e, id) {
     await initApp();
   } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
 }
- 
+
 // ── Export CSV ────────────────────────────────────────────────────
 function exportCSV() {
   const headers = ['Airline','Registration','Type','Ops','Spot','Date','Country'];
@@ -555,7 +582,7 @@ function exportCSV() {
   document.body.removeChild(a); URL.revokeObjectURL(url);
   toast(`✅ Exported ${db.length} records`);
 }
- 
+
 // ── Import XLS ────────────────────────────────────────────────────
 function openImport() {
   document.getElementById('import-modal').classList.add('open');
@@ -564,28 +591,28 @@ function openImport() {
   document.getElementById('import-country').value = '';
 }
 function closeImport() { document.getElementById('import-modal').classList.remove('open'); }
- 
+
 async function runImport() {
   const fileEl   = document.getElementById('import-file');
   const country  = document.getElementById('import-country').value.trim().toUpperCase();
   const statusEl = document.getElementById('import-status');
- 
+
   if (!fileEl.files.length) { statusEl.innerHTML = '<span style="color:var(--red)">Please select a file</span>'; return; }
   if (!country) { statusEl.innerHTML = '<span style="color:var(--red)">Please enter a country name</span>'; return; }
- 
+
   const file = fileEl.files[0];
   statusEl.innerHTML = '⟳ Reading file...';
- 
+
   try {
     // Read file as text (CSV) or parse XLS/XLSX
     const text = await readFileAsCSV(file);
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     if (lines.length < 2) throw new Error('File appears empty');
- 
+
     // Detect delimiter
     const delim = lines[0].includes('\t') ? '\t' : ',';
     const headers = lines[0].split(delim).map(h => h.trim().toLowerCase().replace(/[`']/g,''));
- 
+
     // Map columns flexibly
     const colMap = {};
     headers.forEach((h, i) => {
@@ -596,9 +623,9 @@ async function runImport() {
       if (h.includes('spot') || h === 'airport') colMap.spot = i;
       if (h.includes('date')) colMap.date = i;
     });
- 
+
     if (colMap.registration === undefined) throw new Error('Cannot find Registration column');
- 
+
     const rows = [];
     for (let i = 1; i < lines.length; i++) {
       const cols = lines[i].split(delim);
@@ -616,10 +643,10 @@ async function runImport() {
         is_base:      true,
       });
     }
- 
+
     if (!rows.length) throw new Error('No valid records found');
     statusEl.innerHTML = `⟳ Uploading ${rows.length} records to Supabase...`;
- 
+
     // Upload in batches of 200
     const batchSize = 200;
     let uploaded = 0;
@@ -629,15 +656,15 @@ async function runImport() {
       uploaded += batch.length;
       statusEl.innerHTML = `⟳ Uploaded ${uploaded} / ${rows.length}...`;
     }
- 
+
     statusEl.innerHTML = `<span style="color:var(--success)">✅ Successfully imported ${rows.length} records!</span>`;
     setTimeout(async () => { closeImport(); await initApp(); }, 1500);
- 
+
   } catch(e) {
     statusEl.innerHTML = `<span style="color:var(--red)">❌ Error: ${e.message}</span>`;
   }
 }
- 
+
 async function readFileAsCSV(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -651,7 +678,7 @@ async function readFileAsCSV(file) {
     }
   });
 }
- 
+
 // ── Tabs ──────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -660,7 +687,7 @@ function switchTab(tab, btn) {
   document.getElementById('tab-stats').style.display = tab==='stats' ? 'block' : 'none';
   if (tab==='stats') renderStats();
 }
- 
+
 function renderStats() {
   const airlines={}, spotsMap={}, countriesMap={};
   db.forEach(r => {
@@ -694,12 +721,12 @@ function renderStats() {
       <div class="country-grid">${topC.map(([c,n])=>`<div class="country-item"><span class="country-name">${c}</span><span class="country-count">${n}</span></div>`).join('')}</div>
     </div>`;
 }
- 
+
 window.addEventListener('load', async () => {
   const ok = await sbGetSession();
   if (ok) await initApp();
 });
- 
+
 </script>
 </body>
 </html>
