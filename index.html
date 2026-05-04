@@ -535,7 +535,7 @@ function renderList() {
   for (var i=0; i<slice.length; i++) {
     var rec = slice[i];
     var exp = rec.id === expandedId;
-    var canEdit = rec._mine && !rec._base;
+    var canEdit = true;
     html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" onclick="toggleCard(&quot;' + rec.id + '&quot;)">';
     html += '<div class="record-top">';
     html += '<div class="record-left">';
@@ -624,20 +624,22 @@ async function saveRecord() {
     }
   }
   var payload = {
-    user_id: currentUser.id,
     registration: reg,
     airline: document.getElementById('f-airline').value.trim(),
     type: document.getElementById('f-type').value.trim(),
     ops: document.getElementById('f-ops').value.trim().toUpperCase(),
     spot: document.getElementById('f-spot').value.trim().toUpperCase(),
     date: document.getElementById('f-date').value,
-    country: document.getElementById('f-country').value,
-    is_base: false
+    country: document.getElementById('f-country').value
   };
+  if (!editId) {
+    payload.user_id = currentUser.id;
+    payload.is_base = false;
+  }
   try {
     if (editId) { await sbUpdate(editId, payload); }
     else { await sbInsert(payload); }
-    showToast(editId ? 'Sighting updated' : 'Sighting logged');
+    showToast(editId ? 'Sighting updated' : 'Sighting added');
     closeModal();
     await initApp();
   } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
