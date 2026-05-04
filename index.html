@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -44,7 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .content{padding:16px}
 .search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none;margin-bottom:10px;-webkit-appearance:none}
-.filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;cursor:pointer;-webkit-appearance:none}
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
@@ -62,6 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 .ops-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap}
 .my-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(0,194,255,0.1);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
 .record-airline{color:var(--text);font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.record-type{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
 .record-right{text-align:right;flex-shrink:0}
 .record-spot{color:var(--warning);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
 .record-date{color:var(--muted);font-size:11px;margin-top:2px}
@@ -127,8 +129,6 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
         <div class="header-title"><h1>✈ SPOTTER DB</h1><p>CIVIL AIRLINER DATABASE</p></div>
         <div class="header-actions">
           <span class="user-pill" id="user-pill"></span>
-          <button class="btn-import" onclick="openImport()" title="Import CSV">⬆ IMP</button>
-          <button class="btn-export" onclick="exportCSV()" title="Export CSV">⬇ CSV</button>
           <button class="btn-add" onclick="openModal()">+ LOG</button>
           <button class="btn-icon" onclick="doLogout()" title="Sign out">⏻</button>
         </div>
@@ -139,26 +139,31 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
       </div>
     </div>
 
-    <div class="content" id="tab-list">
-      <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()"/>
-      <div class="filters">
-        <select class="filter-select" id="filter-country" onchange="applyFilters()"><option value="">Country</option></select>
-        <select class="filter-select" id="filter-spot" onchange="applyFilters()"><option value="">Airport</option></select>
-        <select class="filter-select" id="sort-by" onchange="onSort()">
-          <option value="reg">Reg A→Z</option><option value="regdesc">Reg Z→A</option>
-          <option value="date">Date ↓</option><option value="airline">Airline</option>
-        </select>
-      </div>
-      <div class="stats-bar" id="stats-bar"></div>
-      <div class="active-filters" id="active-filters" style="display:none"></div>
-      <div class="record-list" id="record-list"><div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading...</div></div>
-      <div class="pagination" id="pagination"></div>
-    </div>
-    <div class="content" id="tab-stats" style="display:none"></div>
+```
+<div class="content" id="tab-list">
+  <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()"/>
+  <div class="filters">
+    <select class="filter-select" id="filter-country" onchange="applyFilters()"><option value="">Country</option></select>
+    <select class="filter-select" id="filter-spot" onchange="applyFilters()"><option value="">Airport</option></select>
+    <select class="filter-select" id="filter-type" onchange="applyFilters()"><option value="">Type</option></select>
+    <select class="filter-select" id="sort-by" onchange="onSort()">
+      <option value="reg">Reg A→Z</option><option value="regdesc">Reg Z→A</option>
+      <option value="date">Date ↓</option><option value="airline">Airline</option>
+    </select>
+  </div>
+  <div class="stats-bar" id="stats-bar"></div>
+  <div class="active-filters" id="active-filters" style="display:none"></div>
+  <div class="record-list" id="record-list"><div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading...</div></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+<div class="content" id="tab-stats" style="display:none"></div>
+```
+
   </div>
 </div>
 
 <!-- Log/Edit Modal -->
+
 <div class="modal-overlay" id="modal">
   <div class="modal-card">
     <div class="modal-header">
@@ -184,6 +189,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 </div>
 
 <!-- Import Modal -->
+
 <div class="modal-overlay" id="import-modal">
   <div class="modal-card">
     <div class="modal-header">
@@ -214,277 +220,256 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 <div class="toast" id="toast"></div>
 <script>
 
-const SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg';
+const SB_URL = ‘https://azjgmnieyidwwzekhoxh.supabase.co’;
+const SB_KEY = ‘eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg’;
 let SB_TOKEN = null;
 let currentUser = null;
 
 async function sbFetch(path, options={}) {
-  const headers = {
-    'apikey': SB_KEY,
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY),
-    ...options.headers
-  };
-  const res = await fetch(SB_URL + path, { ...options, headers });
-  const text = await res.text();
-  const json = text ? JSON.parse(text) : {};
-  if (!res.ok) throw new Error(json.error_description || json.message || json.msg || 'Request failed');
-  return json;
+const headers = {
+‘apikey’: SB_KEY,
+‘Content-Type’: ‘application/json’,
+‘Authorization’: ’Bearer ’ + (SB_TOKEN || SB_KEY),
+…options.headers
+};
+const res = await fetch(SB_URL + path, { …options, headers });
+const text = await res.text();
+const json = text ? JSON.parse(text) : {};
+if (!res.ok) throw new Error(json.error_description || json.message || json.msg || ‘Request failed’);
+return json;
 }
 
 async function sbSignIn(email, password) {
-  const data = await sbFetch('/auth/v1/token?grant_type=password', {
-    method: 'POST', body: JSON.stringify({ email, password })
-  });
-  SB_TOKEN = data.access_token;
-  currentUser = data.user;
-  sessionStorage.setItem('sb_token', SB_TOKEN);
-  sessionStorage.setItem('sb_user', JSON.stringify(currentUser));
-  return data;
+const data = await sbFetch(’/auth/v1/token?grant_type=password’, {
+method: ‘POST’, body: JSON.stringify({ email, password })
+});
+SB_TOKEN = data.access_token;
+currentUser = data.user;
+sessionStorage.setItem(‘sb_token’, SB_TOKEN);
+sessionStorage.setItem(‘sb_user’, JSON.stringify(currentUser));
+return data;
 }
 
 async function sbSignOut() {
-  try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
-  SB_TOKEN = null; currentUser = null;
-  sessionStorage.removeItem('sb_token');
-  sessionStorage.removeItem('sb_user');
+try { await sbFetch(’/auth/v1/logout’, { method: ‘POST’ }); } catch(e) {}
+SB_TOKEN = null; currentUser = null;
+sessionStorage.removeItem(‘sb_token’);
+sessionStorage.removeItem(‘sb_user’);
 }
 
 async function sbGetSession() {
-  const token = sessionStorage.getItem('sb_token');
-  const user  = sessionStorage.getItem('sb_user');
-  if (token && user) { SB_TOKEN = token; currentUser = JSON.parse(user); return true; }
-  return false;
+const token = sessionStorage.getItem(‘sb_token’);
+const user  = sessionStorage.getItem(‘sb_user’);
+if (token && user) { SB_TOKEN = token; currentUser = JSON.parse(user); return true; }
+return false;
 }
 
 // Fetch ALL records with pagination (Supabase returns max 1000 per request)
 async function sbSelectAll(table) {
-  let all = [], from = 0, limit = 1000;
-  while (true) {
-    const res = await fetch(
-      SB_URL + '/rest/v1/' + table + '?order=registration.asc&limit=' + limit + '&offset=' + from,
-      { headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY), 'Range-Unit': 'items' } }
-    );
-    const batch = await res.json();
-    if (!Array.isArray(batch) || batch.length === 0) break;
-    all = all.concat(batch);
-    if (batch.length < limit) break;
-    from += limit;
-  }
-  return all;
+let all = [], from = 0, limit = 1000;
+while (true) {
+const res = await fetch(
+SB_URL + ‘/rest/v1/’ + table + ‘?order=registration.asc&limit=’ + limit + ‘&offset=’ + from,
+{ headers: { ‘apikey’: SB_KEY, ‘Authorization’: ’Bearer ’ + (SB_TOKEN || SB_KEY), ‘Range-Unit’: ‘items’ } }
+);
+const batch = await res.json();
+if (!Array.isArray(batch) || batch.length === 0) break;
+all = all.concat(batch);
+if (batch.length < limit) break;
+from += limit;
+}
+return all;
 }
 
 async function sbInsert(table, row) {
-  return await sbFetch('/rest/v1/' + table, {
-    method: 'POST', body: JSON.stringify(row),
-    headers: { 'Prefer': 'return=representation' }
-  });
+return await sbFetch(’/rest/v1/’ + table, {
+method: ‘POST’, body: JSON.stringify(row),
+headers: { ‘Prefer’: ‘return=representation’ }
+});
 }
 
 async function sbInsertBatch(table, rows) {
-  return await sbFetch('/rest/v1/' + table, {
-    method: 'POST', body: JSON.stringify(rows),
-    headers: { 'Prefer': 'return=minimal' }
-  });
+return await sbFetch(’/rest/v1/’ + table, {
+method: ‘POST’, body: JSON.stringify(rows),
+headers: { ‘Prefer’: ‘return=minimal’ }
+});
 }
 
 async function sbUpdate(table, id, row) {
-  return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, {
-    method: 'PATCH', body: JSON.stringify(row),
-    headers: { 'Prefer': 'return=representation' }
-  });
+return await sbFetch(’/rest/v1/’ + table + ‘?id=eq.’ + id, {
+method: ‘PATCH’, body: JSON.stringify(row),
+headers: { ‘Prefer’: ‘return=representation’ }
+});
 }
 
 async function sbDelete(table, id) {
-  return await sbFetch('/rest/v1/' + table + '?id=eq.' + id, { method: 'DELETE' });
+return await sbFetch(’/rest/v1/’ + table + ‘?id=eq.’ + id, { method: ‘DELETE’ });
 }
 
 // ── App state ─────────────────────────────────────────────────────
-let db=[], filtered=[], page=0, sortBy='reg', expandedId=null;
-const PAGE_SIZE = 25;
+let db=[], filtered=[], page=0, sortBy=‘reg’, expandedId=null;
+const PAGE_SIZE = 200;
 
 // ── Toast ─────────────────────────────────────────────────────────
-function toast(msg, type='success') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast ' + type;
-  void el.offsetWidth;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+function toast(msg, type=‘success’) {
+const el = document.getElementById(‘toast’);
+el.textContent = msg;
+el.className = ’toast ’ + type;
+void el.offsetWidth;
+el.classList.add(‘show’);
+setTimeout(() => el.classList.remove(‘show’), 3000);
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const btn   = document.getElementById('login-btn');
-  const err   = document.getElementById('login-error');
-  err.style.display = 'none';
-  if (!email || !pass) { err.textContent='Please enter email and password'; err.style.display='block'; return; }
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
-  try {
-    await sbSignIn(email, pass);
-    await initApp();
-  } catch(e) {
-    err.textContent = e.message;
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'SIGN IN';
-  }
+const email = document.getElementById(‘login-email’).value.trim();
+const pass  = document.getElementById(‘login-pass’).value;
+const btn   = document.getElementById(‘login-btn’);
+const err   = document.getElementById(‘login-error’);
+err.style.display = ‘none’;
+if (!email || !pass) { err.textContent=‘Please enter email and password’; err.style.display=‘block’; return; }
+btn.disabled = true;
+btn.innerHTML = ‘<span class="spinner"></span>SIGNING IN…’;
+try {
+await sbSignIn(email, pass);
+await initApp();
+} catch(e) {
+err.textContent = e.message;
+err.style.display = ‘block’;
+btn.disabled = false;
+btn.textContent = ‘SIGN IN’;
+}
 }
 
 async function doLogout() {
-  await sbSignOut();
-  db = []; filtered = [];
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-login').classList.add('active');
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-btn').disabled = false;
-  document.getElementById('login-btn').textContent = 'SIGN IN';
+await sbSignOut();
+db = []; filtered = [];
+document.getElementById(‘screen-app’).classList.remove(‘active’);
+document.getElementById(‘screen-login’).classList.add(‘active’);
+document.getElementById(‘login-pass’).value = ‘’;
+document.getElementById(‘login-btn’).disabled = false;
+document.getElementById(‘login-btn’).textContent = ‘SIGN IN’;
 }
 
-document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById(‘login-pass’).addEventListener(‘keydown’, e => { if(e.key===‘Enter’) doLogin(); });
+document.getElementById(‘login-email’).addEventListener(‘keydown’, e => { if(e.key===‘Enter’) doLogin(); });
 
 // ── App init ──────────────────────────────────────────────────────
 async function initApp() {
-  document.getElementById('screen-login').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
-  document.getElementById('user-pill').textContent = currentUser.email.split('@')[0].toUpperCase();
-  document.getElementById('record-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading database...</div>';
+document.getElementById(‘screen-login’).classList.remove(‘active’);
+document.getElementById(‘screen-app’).classList.add(‘active’);
+document.getElementById(‘user-pill’).textContent = currentUser.email.split(’@’)[0].toUpperCase();
+document.getElementById(‘record-list’).innerHTML = ‘<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">⟳ Loading database…</div>’;
 
-  try {
-    const rows = await sbSelectAll('sightings');
-    db = rows.map(r => ({
-      id: r.id,
-      airline: r.airline||'', registration: r.registration||'',
-      type: r.type||'', ops: r.ops||'', spot: r.spot||'',
-      date: r.date||'', country: r.country||'',
-      _mine: r.user_id === currentUser.id,
-      _base: r.is_base === true,
-      _cloud: true,
-    }));
-  } catch(e) {
-    toast('Failed to load database: ' + e.message, 'error');
-    db = [];
-  }
+try {
+const rows = await sbSelectAll(‘sightings’);
+db = rows.map(r => ({
+id: r.id,
+airline: r.airline||’’, registration: r.registration||’’,
+type: r.type||’’, ops: r.ops||’’, spot: r.spot||’’,
+date: r.date||’’, country: r.country||’’,
+_mine: r.user_id === currentUser.id,
+_base: r.is_base === true,
+_cloud: true,
+}));
+} catch(e) {
+toast(’Failed to load database: ’ + e.message, ‘error’);
+db = [];
+}
 
-  populateFilters();
-  applyFilters();
+populateFilters();
+applyFilters();
 }
 
 // ── Filters ───────────────────────────────────────────────────────
 function populateFilters() {
-  const countries = [...new Set(db.map(r=>r.country).filter(Boolean))].sort();
-  const spots     = [...new Set(db.map(r=>r.spot).filter(Boolean))].sort();
-  document.getElementById('filter-country').innerHTML =
-    '<option value="">Country</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
-  document.getElementById('filter-spot').innerHTML =
-    '<option value="">Airport</option>' + spots.map(s=>`<option value="${s}">${s}</option>`).join('');
-  document.getElementById('f-country').innerHTML =
-    '<option value="">Select country...</option>' + countries.map(c=>`<option value="${c}">${c}</option>`).join('');
+const countries = […new Set(db.map(r=>r.country).filter(Boolean))].sort();
+const spots     = […new Set(db.map(r=>r.spot).filter(Boolean))].sort();
+const types     = […new Set(db.map(r=>r.type).filter(Boolean))].sort();
+document.getElementById(‘filter-country’).innerHTML =
+‘<option value="">Country</option>’ + countries.map(c=>`<option value="${c}">${c}</option>`).join(’’);
+document.getElementById(‘filter-spot’).innerHTML =
+‘<option value="">Airport</option>’ + spots.map(s=>`<option value="${s}">${s}</option>`).join(’’);
+document.getElementById(‘filter-type’).innerHTML =
+‘<option value="">Type</option>’ + types.map(t=>`<option value="${t}">${t}</option>`).join(’’);
+document.getElementById(‘f-country’).innerHTML =
+‘<option value="">Select country…</option>’ + countries.map(c=>`<option value="${c}">${c}</option>`).join(’’);
 }
 
 function applyFilters() {
-  const q       = document.getElementById('search-box').value.toLowerCase().trim();
-  const country = document.getElementById('filter-country').value;
-  const spot    = document.getElementById('filter-spot').value;
-  filtered = db.filter(r => {
-    if (q && !Object.values(r).some(v => String(v||'').toLowerCase().includes(q))) return false;
-    if (country && r.country !== country) return false;
-    if (spot && r.spot !== spot) return false;
-    return true;
-  });
-  filtered.sort((a,b) => {
-    if (sortBy==='reg')     return (a.registration||'').localeCompare(b.registration||'');
-    if (sortBy==='regdesc') return (b.registration||'').localeCompare(a.registration||'');
-    if (sortBy==='date')    return (b.date||'').localeCompare(a.date||'');
-    if (sortBy==='airline') return (a.airline||'').localeCompare(b.airline||'');
-    return 0;
-  });
-  page = 0;
-  renderStatsBar(q, country, spot);
-  renderList();
+const q       = document.getElementById(‘search-box’).value.toLowerCase().trim();
+const country = document.getElementById(‘filter-country’).value;
+const spot    = document.getElementById(‘filter-spot’).value;
+const type    = document.getElementById(‘filter-type’).value;
+filtered = db.filter(r => {
+if (q && !Object.values(r).some(v => String(v||’’).toLowerCase().includes(q))) return false;
+if (country && r.country !== country) return false;
+if (spot && r.spot !== spot) return false;
+if (type && r.type !== type) return false;
+return true;
+});
+filtered.sort((a,b) => {
+if (sortBy===‘reg’)     return (a.registration||’’).localeCompare(b.registration||’’);
+if (sortBy===‘regdesc’) return (b.registration||’’).localeCompare(a.registration||’’);
+if (sortBy===‘date’)    return (b.date||’’).localeCompare(a.date||’’);
+if (sortBy===‘airline’) return (a.airline||’’).localeCompare(b.airline||’’);
+return 0;
+});
+page = 0;
+renderStatsBar(q, country, spot, type);
+renderList();
 }
 
-function onSort() { sortBy = document.getElementById('sort-by').value; applyFilters(); }
+function onSort() { sortBy = document.getElementById(‘sort-by’).value; applyFilters(); }
 
-function renderStatsBar(q, country, spot) {
-  const airlines = new Set(filtered.map(r=>r.airline).filter(Boolean)).size;
-  const spots2   = new Set(filtered.map(r=>r.spot).filter(Boolean)).size;
-  document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${filtered.length}</div><div class="stat-label">SIGHTINGS</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${airlines}</div><div class="stat-label">AIRLINES</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--success)">${spots2}</div><div class="stat-label">AIRPORTS</div></div>`;
-  const af = document.getElementById('active-filters');
-  if (!q && !country && !spot) { af.style.display='none'; return; }
-  af.style.display = 'flex';
-  let h = '';
-  if (country) h += `<span class="filter-tag" onclick="clearFilter('country')">${country} ✕</span>`;
-  if (spot)    h += `<span class="filter-tag" onclick="clearFilter('spot')">${spot} ✕</span>`;
-  if (q)       h += `<span class="filter-tag" onclick="clearFilter('search')">"${q}" ✕</span>`;
-  h += `<button class="clear-btn" onclick="clearAll()">Clear all</button>`;
-  af.innerHTML = h;
+function renderStatsBar(q, country, spot, type) {
+const airlines = new Set(filtered.map(r=>r.airline).filter(Boolean)).size;
+const spots2   = new Set(filtered.map(r=>r.spot).filter(Boolean)).size;
+document.getElementById(‘stats-bar’).innerHTML = ` <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${filtered.length}</div><div class="stat-label">SIGHTINGS</div></div> <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${airlines}</div><div class="stat-label">AIRLINES</div></div> <div class="stat-card"><div class="stat-num" style="color:var(--success)">${spots2}</div><div class="stat-label">AIRPORTS</div></div>`;
+const af = document.getElementById(‘active-filters’);
+if (!q && !country && !spot && !type) { af.style.display=‘none’; return; }
+af.style.display = ‘flex’;
+let h = ‘’;
+if (country) h += `<span class="filter-tag" onclick="clearFilter('country')">${country} ✕</span>`;
+if (spot)    h += `<span class="filter-tag" onclick="clearFilter('spot')">${spot} ✕</span>`;
+if (type)    h += `<span class="filter-tag" onclick="clearFilter('type')">${type} ✕</span>`;
+if (q)       h += `<span class="filter-tag" onclick="clearFilter('search')">"${q}" ✕</span>`;
+h += `<button class="clear-btn" onclick="clearAll()">Clear all</button>`;
+af.innerHTML = h;
 }
 
 function clearFilter(t) {
-  if(t==='country') document.getElementById('filter-country').value='';
-  if(t==='spot')    document.getElementById('filter-spot').value='';
-  if(t==='search')  document.getElementById('search-box').value='';
-  applyFilters();
+if(t===‘country’) document.getElementById(‘filter-country’).value=’’;
+if(t===‘spot’)    document.getElementById(‘filter-spot’).value=’’;
+if(t===‘type’)    document.getElementById(‘filter-type’).value=’’;
+if(t===‘search’)  document.getElementById(‘search-box’).value=’’;
+applyFilters();
 }
 function clearAll() {
-  ['filter-country','filter-spot','search-box'].forEach(id => document.getElementById(id).value='');
-  applyFilters();
+[‘filter-country’,‘filter-spot’,‘filter-type’,‘search-box’].forEach(id => document.getElementById(id).value=’’);
+applyFilters();
 }
 
-function fmt(v) { return v || '—'; }
+function fmt(v) { return v || ‘—’; }
 
 function renderList() {
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
-  const list  = document.getElementById('record-list');
-  if (!slice.length) {
-    list.innerHTML = '<div class="empty-state">NO SIGHTINGS FOUND</div>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
-  list.innerHTML = slice.map(rec => {
-    const exp     = rec.id === expandedId;
-    const canEdit = rec._mine && !rec._base;
-    return `<div class="record-card${exp?' expanded':''}${rec._mine?' mine':''}" onclick="toggleCard('${rec.id}')">
-      <div class="record-top">
-        <div class="record-left">
-          <div class="reg-row">
-            <span class="record-reg">${rec.registration}</span>
-            ${rec.ops ? `<span class="ops-badge">${rec.ops}</span>` : ''}
-            ${rec._mine && !rec._base ? '<span class="my-badge">MY LOG</span>' : ''}
-          </div>
-          <div class="record-airline">${fmt(rec.airline)}</div>
-        </div>
-        <div class="record-right">
-          <div class="record-spot">${fmt(rec.spot)}</div>
-          <div class="record-date">${fmt(rec.date)}</div>
-        </div>
-      </div>
-      <div class="record-detail">
-        <div class="detail-grid">
-          <div><div class="detail-key">TYPE</div><div class="detail-val">${fmt(rec.type)}</div></div>
-          <div><div class="detail-key">COUNTRY</div><div class="detail-val">${fmt(rec.country)}</div></div>
-        </div>
-        ${canEdit ? `<div class="detail-actions">
-          <button class="btn-edit" onclick="editRecord(event,'${rec.id}')">EDIT</button>
-          <button class="btn-delete" onclick="deleteRecord(event,'${rec.id}')">🗑</button>
-        </div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('pagination').innerHTML = totalPages<=1 ? '' : `
-    <button class="page-btn" onclick="changePage(-1)"${page===0?' disabled':''}>‹</button>
-    <span class="page-info">${page+1} / ${totalPages}</span>
-    <button class="page-btn" onclick="changePage(1)"${page>=totalPages-1?' disabled':''}>›</button>`;
+const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+const slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
+const list  = document.getElementById(‘record-list’);
+if (!slice.length) {
+list.innerHTML = ‘<div class="empty-state">NO SIGHTINGS FOUND</div>’;
+document.getElementById(‘pagination’).innerHTML = ‘’;
+return;
+}
+list.innerHTML = slice.map(rec => {
+const exp     = rec.id === expandedId;
+const canEdit = rec._mine && !rec._base;
+return `<div class="record-card${exp?' expanded':''}${rec._mine?' mine':''}" onclick="toggleCard('${rec.id}')"> <div class="record-top"> <div class="record-left"> <div class="reg-row"> <span class="record-reg">${rec.registration}</span> ${rec.ops ? `<span class="ops-badge">${rec.ops}</span>`: ''} ${rec._mine && !rec._base ? '<span class="my-badge">MY LOG</span>' : ''} </div> <div class="record-airline">${fmt(rec.airline)}</div> <div class="record-type">${fmt(rec.type)}</div> </div> <div class="record-right"> <div class="record-spot">${fmt(rec.spot)}</div> <div class="record-date">${fmt(rec.date)}</div> </div> </div> <div class="record-detail"> <div class="detail-grid"> <div><div class="detail-key">TYPE</div><div class="detail-val">${fmt(rec.type)}</div></div> <div><div class="detail-key">COUNTRY</div><div class="detail-val">${fmt(rec.country)}</div></div> </div> ${canEdit ?`<div class="detail-actions">
+<button class="btn-edit" onclick="editRecord(event,'${rec.id}')">EDIT</button>
+<button class="btn-delete" onclick="deleteRecord(event,'${rec.id}')">🗑</button>
+</div>` : ''} </div> </div>`;
+}).join(’’);
+document.getElementById(‘pagination’).innerHTML = totalPages<=1 ? ‘’ : ` <button class="page-btn" onclick="changePage(-1)"${page===0?' disabled':''}>‹</button> <span class="page-info">${page+1} / ${totalPages}</span> <button class="page-btn" onclick="changePage(1)"${page>=totalPages-1?' disabled':''}>›</button>`;
 }
 
 function toggleCard(id) { expandedId = expandedId===id ? null : id; renderList(); }
@@ -492,239 +477,223 @@ function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scro
 
 // ── Log / Edit modal ──────────────────────────────────────────────
 function openModal(rec) {
-  document.getElementById('edit-id').value   = rec ? rec.id : '';
-  document.getElementById('modal-title').textContent = rec ? '✏️ EDIT SIGHTING' : '✈️ LOG NEW SIGHTING';
-  document.getElementById('f-reg').value     = rec ? rec.registration : '';
-  document.getElementById('f-airline').value = rec ? rec.airline : '';
-  document.getElementById('f-type').value    = rec ? rec.type : '';
-  document.getElementById('f-ops').value     = rec ? rec.ops : '';
-  document.getElementById('f-spot').value    = rec ? rec.spot : '';
-  document.getElementById('f-date').value    = rec ? rec.date : '';
-  document.getElementById('f-country').value = rec ? rec.country : '';
-  document.getElementById('dup-warning').style.display = 'none';
-  document.getElementById('save-btn').disabled = false;
-  document.getElementById('modal').classList.add('open');
+document.getElementById(‘edit-id’).value   = rec ? rec.id : ‘’;
+document.getElementById(‘modal-title’).textContent = rec ? ‘✏️ EDIT SIGHTING’ : ‘✈️ LOG NEW SIGHTING’;
+document.getElementById(‘f-reg’).value     = rec ? rec.registration : ‘’;
+document.getElementById(‘f-airline’).value = rec ? rec.airline : ‘’;
+document.getElementById(‘f-type’).value    = rec ? rec.type : ‘’;
+document.getElementById(‘f-ops’).value     = rec ? rec.ops : ‘’;
+document.getElementById(‘f-spot’).value    = rec ? rec.spot : ‘’;
+document.getElementById(‘f-date’).value    = rec ? rec.date : ‘’;
+document.getElementById(‘f-country’).value = rec ? rec.country : ‘’;
+document.getElementById(‘dup-warning’).style.display = ‘none’;
+document.getElementById(‘save-btn’).disabled = false;
+document.getElementById(‘modal’).classList.add(‘open’);
 }
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeModal() { document.getElementById(‘modal’).classList.remove(‘open’); }
 
 function checkRegDuplicate() {
-  const reg = document.getElementById('f-reg').value.trim().toUpperCase();
-  const editId = document.getElementById('edit-id').value;
-  const dupWarn = document.getElementById('dup-warning');
-  const saveBtn = document.getElementById('save-btn');
-  if (!reg || editId) { dupWarn.style.display='none'; saveBtn.disabled=false; return; }
-  const existing = db.find(r => r.registration.toUpperCase() === reg);
-  if (existing) {
-    dupWarn.innerHTML = `⚠️ <strong>${reg}</strong> already exists — ${existing.airline||'Unknown airline'}, ${existing.type||'Unknown type'}, spotted at <strong>${existing.spot||'?'}</strong> on ${existing.date||'?'}.`;
-    dupWarn.style.display = 'block';
-    saveBtn.disabled = true;
-  } else {
-    dupWarn.style.display = 'none';
-    saveBtn.disabled = false;
-  }
+const reg = document.getElementById(‘f-reg’).value.trim().toUpperCase();
+const editId = document.getElementById(‘edit-id’).value;
+const dupWarn = document.getElementById(‘dup-warning’);
+const saveBtn = document.getElementById(‘save-btn’);
+if (!reg || editId) { dupWarn.style.display=‘none’; saveBtn.disabled=false; return; }
+const existing = db.find(r => r.registration.toUpperCase() === reg);
+if (existing) {
+dupWarn.innerHTML = `⚠️ <strong>${reg}</strong> already exists — ${existing.airline||'Unknown airline'}, ${existing.type||'Unknown type'}, spotted at <strong>${existing.spot||'?'}</strong> on ${existing.date||'?'}.`;
+dupWarn.style.display = ‘block’;
+saveBtn.disabled = true;
+} else {
+dupWarn.style.display = ‘none’;
+saveBtn.disabled = false;
+}
 }
 
 async function saveRecord() {
-  const reg = document.getElementById('f-reg').value.trim().toUpperCase();
-  if (!reg) { alert('Registration is required'); return; }
-  const editId = document.getElementById('edit-id').value;
+const reg = document.getElementById(‘f-reg’).value.trim().toUpperCase();
+if (!reg) { alert(‘Registration is required’); return; }
+const editId = document.getElementById(‘edit-id’).value;
 
-  // Final duplicate guard
-  if (!editId) {
-    const existing = db.find(r => r.registration.toUpperCase() === reg);
-    if (existing) return;
-  }
+// Final duplicate guard
+if (!editId) {
+const existing = db.find(r => r.registration.toUpperCase() === reg);
+if (existing) return;
+}
 
-  const payload = {
-    user_id: currentUser.id,
-    registration: reg,
-    airline: document.getElementById('f-airline').value.trim(),
-    type: document.getElementById('f-type').value.trim(),
-    ops: document.getElementById('f-ops').value.trim().toUpperCase(),
-    spot: document.getElementById('f-spot').value.trim().toUpperCase(),
-    date: document.getElementById('f-date').value,
-    country: document.getElementById('f-country').value,
-    is_base: false,
-  };
-  try {
-    if (editId) { await sbUpdate('sightings', editId, payload); }
-    else { await sbInsert('sightings', payload); }
-    toast(editId ? '✅ Sighting updated' : '✅ Sighting logged');
-    closeModal();
-    await initApp();
-  } catch(e) { toast('Save failed: ' + e.message, 'error'); }
+const payload = {
+user_id: currentUser.id,
+registration: reg,
+airline: document.getElementById(‘f-airline’).value.trim(),
+type: document.getElementById(‘f-type’).value.trim(),
+ops: document.getElementById(‘f-ops’).value.trim().toUpperCase(),
+spot: document.getElementById(‘f-spot’).value.trim().toUpperCase(),
+date: document.getElementById(‘f-date’).value,
+country: document.getElementById(‘f-country’).value,
+is_base: false,
+};
+try {
+if (editId) { await sbUpdate(‘sightings’, editId, payload); }
+else { await sbInsert(‘sightings’, payload); }
+toast(editId ? ‘✅ Sighting updated’ : ‘✅ Sighting logged’);
+closeModal();
+await initApp();
+} catch(e) { toast(’Save failed: ’ + e.message, ‘error’); }
 }
 
 function editRecord(e, id) { e.stopPropagation(); const rec=db.find(r=>r.id===id); if(rec) openModal(rec); }
 
 async function deleteRecord(e, id) {
-  e.stopPropagation();
-  if (!confirm('Delete this sighting?')) return;
-  try {
-    await sbFetch('/rest/v1/sightings?id=eq.' + id, { method: 'DELETE' });
-    toast('🗑 Sighting deleted');
-    await initApp();
-  } catch(e) { toast('Delete failed: ' + e.message, 'error'); }
+e.stopPropagation();
+if (!confirm(‘Delete this sighting?’)) return;
+try {
+await sbFetch(’/rest/v1/sightings?id=eq.’ + id, { method: ‘DELETE’ });
+toast(‘🗑 Sighting deleted’);
+await initApp();
+} catch(e) { toast(’Delete failed: ’ + e.message, ‘error’); }
 }
 
 // ── Export CSV ────────────────────────────────────────────────────
 function exportCSV() {
-  const headers = ['Airline','Registration','Type','Ops','Spot','Date','Country'];
-  const rows = db.map(r => [r.airline,r.registration,r.type,r.ops,r.spot,r.date,r.country]
-    .map(v => { const s=String(v||''); return (s.includes(',')||s.includes('"')||s.includes('\n')) ? '"'+s.replace(/"/g,'""')+'"' : s; })
-    .join(','));
-  const csv = [headers.join(','), ...rows].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = `SpotterDB_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  toast(`✅ Exported ${db.length} records`);
+const headers = [‘Airline’,‘Registration’,‘Type’,‘Ops’,‘Spot’,‘Date’,‘Country’];
+const rows = db.map(r => [r.airline,r.registration,r.type,r.ops,r.spot,r.date,r.country]
+.map(v => { const s=String(v||’’); return (s.includes(’,’)||s.includes(’”’)||s.includes(’\n’)) ? ‘”’+s.replace(/”/g,’””’)+’”’ : s; })
+.join(’,’));
+const csv = [headers.join(’,’), …rows].join(’\r\n’);
+const blob = new Blob([csv], { type: ‘text/csv;charset=utf-8;’ });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement(‘a’);
+a.href = url; a.download = `SpotterDB_${new Date().toISOString().slice(0,10)}.csv`;
+document.body.appendChild(a); a.click();
+document.body.removeChild(a); URL.revokeObjectURL(url);
+toast(`✅ Exported ${db.length} records`);
 }
 
 // ── Import XLS ────────────────────────────────────────────────────
 function openImport() {
-  document.getElementById('import-modal').classList.add('open');
-  document.getElementById('import-status').innerHTML = '';
-  document.getElementById('import-file').value = '';
-  document.getElementById('import-country').value = '';
+document.getElementById(‘import-modal’).classList.add(‘open’);
+document.getElementById(‘import-status’).innerHTML = ‘’;
+document.getElementById(‘import-file’).value = ‘’;
+document.getElementById(‘import-country’).value = ‘’;
 }
-function closeImport() { document.getElementById('import-modal').classList.remove('open'); }
+function closeImport() { document.getElementById(‘import-modal’).classList.remove(‘open’); }
 
 async function runImport() {
-  const fileEl   = document.getElementById('import-file');
-  const country  = document.getElementById('import-country').value.trim().toUpperCase();
-  const statusEl = document.getElementById('import-status');
+const fileEl   = document.getElementById(‘import-file’);
+const country  = document.getElementById(‘import-country’).value.trim().toUpperCase();
+const statusEl = document.getElementById(‘import-status’);
 
-  if (!fileEl.files.length) { statusEl.innerHTML = '<span style="color:var(--red)">Please select a file</span>'; return; }
-  if (!country) { statusEl.innerHTML = '<span style="color:var(--red)">Please enter a country name</span>'; return; }
+if (!fileEl.files.length) { statusEl.innerHTML = ‘<span style="color:var(--red)">Please select a file</span>’; return; }
+if (!country) { statusEl.innerHTML = ‘<span style="color:var(--red)">Please enter a country name</span>’; return; }
 
-  const file = fileEl.files[0];
-  statusEl.innerHTML = '⟳ Reading file...';
+const file = fileEl.files[0];
+statusEl.innerHTML = ‘⟳ Reading file…’;
 
-  try {
-    // Read file as text (CSV) or parse XLS/XLSX
-    const text = await readFileAsCSV(file);
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    if (lines.length < 2) throw new Error('File appears empty');
+try {
+// Read file as text (CSV) or parse XLS/XLSX
+const text = await readFileAsCSV(file);
+const lines = text.split(/\r?\n/).filter(l => l.trim());
+if (lines.length < 2) throw new Error(‘File appears empty’);
 
-    // Detect delimiter
-    const delim = lines[0].includes('\t') ? '\t' : ',';
-    const headers = lines[0].split(delim).map(h => h.trim().toLowerCase().replace(/[`']/g,''));
+```
+// Detect delimiter
+const delim = lines[0].includes('\t') ? '\t' : ',';
+const headers = lines[0].split(delim).map(h => h.trim().toLowerCase().replace(/[`']/g,''));
 
-    // Map columns flexibly
-    const colMap = {};
-    headers.forEach((h, i) => {
-      if (h.includes('airline')) colMap.airline = i;
-      if (h.includes('reg')) colMap.registration = i;
-      if (h.includes('type')) colMap.type = i;
-      if (h.includes('ops') || h === 'icao') colMap.ops = i;
-      if (h.includes('spot') || h === 'airport') colMap.spot = i;
-      if (h.includes('date')) colMap.date = i;
-    });
+// Map columns flexibly
+const colMap = {};
+headers.forEach((h, i) => {
+  if (h.includes('airline')) colMap.airline = i;
+  if (h.includes('reg')) colMap.registration = i;
+  if (h.includes('type')) colMap.type = i;
+  if (h.includes('ops') || h === 'icao') colMap.ops = i;
+  if (h.includes('spot') || h === 'airport') colMap.spot = i;
+  if (h.includes('date')) colMap.date = i;
+});
 
-    if (colMap.registration === undefined) throw new Error('Cannot find Registration column');
+if (colMap.registration === undefined) throw new Error('Cannot find Registration column');
 
-    const rows = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(delim);
-      const reg = (cols[colMap.registration]||'').trim().replace(/^"|"$/g,'');
-      if (!reg) continue;
-      rows.push({
-        user_id: currentUser.id,
-        airline:      (cols[colMap.airline]||'').trim().replace(/^"|"$/g,''),
-        registration: reg,
-        type:         (cols[colMap.type]||'').trim().replace(/^"|"$/g,''),
-        ops:          (cols[colMap.ops]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
-        spot:         (cols[colMap.spot]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
-        date:         (cols[colMap.date]||'').trim().replace(/^"|"$/g,''),
-        country:      country,
-        is_base:      true,
-      });
-    }
+const rows = [];
+for (let i = 1; i < lines.length; i++) {
+  const cols = lines[i].split(delim);
+  const reg = (cols[colMap.registration]||'').trim().replace(/^"|"$/g,'');
+  if (!reg) continue;
+  rows.push({
+    user_id: currentUser.id,
+    airline:      (cols[colMap.airline]||'').trim().replace(/^"|"$/g,''),
+    registration: reg,
+    type:         (cols[colMap.type]||'').trim().replace(/^"|"$/g,''),
+    ops:          (cols[colMap.ops]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
+    spot:         (cols[colMap.spot]||'').trim().replace(/^"|"$/g,'').toUpperCase(),
+    date:         (cols[colMap.date]||'').trim().replace(/^"|"$/g,''),
+    country:      country,
+    is_base:      true,
+  });
+}
 
-    if (!rows.length) throw new Error('No valid records found');
-    statusEl.innerHTML = `⟳ Uploading ${rows.length} records to Supabase...`;
+if (!rows.length) throw new Error('No valid records found');
+statusEl.innerHTML = `⟳ Uploading ${rows.length} records to Supabase...`;
 
-    // Upload in batches of 200
-    const batchSize = 200;
-    let uploaded = 0;
-    for (let i = 0; i < rows.length; i += batchSize) {
-      const batch = rows.slice(i, i + batchSize);
-      await sbInsertBatch('sightings', batch);
-      uploaded += batch.length;
-      statusEl.innerHTML = `⟳ Uploaded ${uploaded} / ${rows.length}...`;
-    }
+// Upload in batches of 200
+const batchSize = 200;
+let uploaded = 0;
+for (let i = 0; i < rows.length; i += batchSize) {
+  const batch = rows.slice(i, i + batchSize);
+  await sbInsertBatch('sightings', batch);
+  uploaded += batch.length;
+  statusEl.innerHTML = `⟳ Uploaded ${uploaded} / ${rows.length}...`;
+}
 
-    statusEl.innerHTML = `<span style="color:var(--success)">✅ Successfully imported ${rows.length} records!</span>`;
-    setTimeout(async () => { closeImport(); await initApp(); }, 1500);
+statusEl.innerHTML = `<span style="color:var(--success)">✅ Successfully imported ${rows.length} records!</span>`;
+setTimeout(async () => { closeImport(); await initApp(); }, 1500);
+```
 
-  } catch(e) {
-    statusEl.innerHTML = `<span style="color:var(--red)">❌ Error: ${e.message}</span>`;
-  }
+} catch(e) {
+statusEl.innerHTML = `<span style="color:var(--red)">❌ Error: ${e.message}</span>`;
+}
 }
 
 async function readFileAsCSV(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = () => reject(new Error('Could not read file'));
-    // For CSV files read as text; for XLS tell user to save as CSV
-    if (file.name.match(/\.csv$/i)) {
-      reader.readAsText(file);
-    } else {
-      reject(new Error('Please save your XLS file as CSV first (File → Save As → CSV in Excel/Numbers), then import the CSV'));
-    }
-  });
+return new Promise((resolve, reject) => {
+const reader = new FileReader();
+reader.onload = e => resolve(e.target.result);
+reader.onerror = () => reject(new Error(‘Could not read file’));
+// For CSV files read as text; for XLS tell user to save as CSV
+if (file.name.match(/.csv$/i)) {
+reader.readAsText(file);
+} else {
+reject(new Error(‘Please save your XLS file as CSV first (File → Save As → CSV in Excel/Numbers), then import the CSV’));
+}
+});
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-list').style.display  = tab==='list'  ? 'block' : 'none';
-  document.getElementById('tab-stats').style.display = tab==='stats' ? 'block' : 'none';
-  if (tab==='stats') renderStats();
+document.querySelectorAll(’.tab-btn’).forEach(b=>b.classList.remove(‘active’));
+btn.classList.add(‘active’);
+document.getElementById(‘tab-list’).style.display  = tab===‘list’  ? ‘block’ : ‘none’;
+document.getElementById(‘tab-stats’).style.display = tab===‘stats’ ? ‘block’ : ‘none’;
+if (tab===‘stats’) renderStats();
 }
 
 function renderStats() {
-  const airlines={}, spotsMap={}, countriesMap={};
-  db.forEach(r => {
-    if(r.airline) airlines[r.airline]=(airlines[r.airline]||0)+1;
-    if(r.spot)    spotsMap[r.spot]=(spotsMap[r.spot]||0)+1;
-    if(r.country) countriesMap[r.country]=(countriesMap[r.country]||0)+1;
-  });
-  const topA = Object.entries(airlines).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const topS = Object.entries(spotsMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const topC = Object.entries(countriesMap).sort((a,b)=>b[1]-a[1]).slice(0,20);
-  const tA = new Set(db.map(r=>r.airline).filter(Boolean)).size;
-  const tS = new Set(db.map(r=>r.spot).filter(Boolean)).size;
-  const myCount = db.filter(r=>r._mine && !r._base).length;
-  document.getElementById('tab-stats').innerHTML = `
-    <div class="stats-bar" style="margin-bottom:20px">
-      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${db.length}</div><div class="stat-label">SIGHTINGS</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${tA}</div><div class="stat-label">AIRLINES</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--success)">${tS}</div><div class="stat-label">AIRPORTS</div></div>
-    </div>
-    <div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
-      <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span>
-      <span style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--accent)">${myCount}</span>
-    </div>
-    <div class="stats-section"><h3>TOP AIRLINES</h3>
-      ${topA.map(([n,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name">${n}</span><span class="bar-count" style="color:var(--warning)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topA[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>`).join('')}
-    </div>
-    <div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3>
-      ${topS.map(([s,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:'JetBrains Mono',monospace;font-weight:700">${s}</span><span class="bar-count" style="color:var(--success)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topS[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>`).join('')}
-    </div>
-    <div class="stats-section"><h3>BY COUNTRY</h3>
-      <div class="country-grid">${topC.map(([c,n])=>`<div class="country-item"><span class="country-name">${c}</span><span class="country-count">${n}</span></div>`).join('')}</div>
-    </div>`;
+const airlines={}, spotsMap={}, countriesMap={};
+db.forEach(r => {
+if(r.airline) airlines[r.airline]=(airlines[r.airline]||0)+1;
+if(r.spot)    spotsMap[r.spot]=(spotsMap[r.spot]||0)+1;
+if(r.country) countriesMap[r.country]=(countriesMap[r.country]||0)+1;
+});
+const topA = Object.entries(airlines).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const topS = Object.entries(spotsMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+const topC = Object.entries(countriesMap).sort((a,b)=>b[1]-a[1]).slice(0,20);
+const tA = new Set(db.map(r=>r.airline).filter(Boolean)).size;
+const tS = new Set(db.map(r=>r.spot).filter(Boolean)).size;
+const myCount = db.filter(r=>r._mine && !r._base).length;
+document.getElementById(‘tab-stats’).innerHTML = ` <div class="stats-bar" style="margin-bottom:20px"> <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${db.length}</div><div class="stat-label">SIGHTINGS</div></div> <div class="stat-card"><div class="stat-num" style="color:var(--warning)">${tA}</div><div class="stat-label">AIRLINES</div></div> <div class="stat-card"><div class="stat-num" style="color:var(--success)">${tS}</div><div class="stat-label">AIRPORTS</div></div> </div> <div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center"> <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span> <span style="font-family:'Orbitron',sans-serif;font-size:20px;font-weight:900;color:var(--accent)">${myCount}</span> </div> <div class="stats-section"><h3>TOP AIRLINES</h3> ${topA.map(([n,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name">${n}</span><span class="bar-count" style="color:var(--warning)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topA[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>`).join('')} </div> <div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3> ${topS.map(([s,c])=>`<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:'JetBrains Mono',monospace;font-weight:700">${s}</span><span class="bar-count" style="color:var(--success)">${c}</span></div><div class="bar-track"><div class="bar-fill" style="width:${(c/topS[0][1]*100).toFixed(1)}%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>`).join('')} </div> <div class="stats-section"><h3>BY COUNTRY</h3> <div class="country-grid">${topC.map(([c,n])=>`<div class="country-item"><span class="country-name">${c}</span><span class="country-count">${n}</span></div>`).join('')}</div> </div>`;
 }
 
-window.addEventListener('load', async () => {
-  const ok = await sbGetSession();
-  if (ok) await initApp();
+window.addEventListener(‘load’, async () => {
+const ok = await sbGetSession();
+if (ok) await initApp();
 });
 
 </script>
