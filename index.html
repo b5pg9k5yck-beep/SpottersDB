@@ -287,10 +287,12 @@ var expandedId = null;
 var PAGE_SIZE = 200;
 
 function sbHeaders() {
+  var token = SB_TOKEN || SB_KEY;
   return {
     'apikey': SB_KEY,
+    'Authorization': 'Bearer ' + token,
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY)
+    'Accept': 'application/json'
   };
 }
 
@@ -422,6 +424,7 @@ async function initApp() {
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('user-pill').textContent = currentUser.email.split('@')[0].toUpperCase();
   document.getElementById('record-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">Loading database...</div>';
+  console.log('Token present:', !!SB_TOKEN, '| Length:', SB_TOKEN ? SB_TOKEN.length : 0);
   try {
     var rows = await sbSelectAll();
     db = rows.map(function(r) {
