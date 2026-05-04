@@ -498,10 +498,10 @@ function renderStatsBar(q, country, spot, type) {
   if (!q && !country && !spot && !type) { af.style.display='none'; return; }
   af.style.display = 'flex';
   var h = '';
-  if (country) h += '<span class="filter-tag" onclick="clearFilter('country')">'+country+' x</span>';
-  if (spot)    h += '<span class="filter-tag" onclick="clearFilter('spot')">'+spot+' x</span>';
-  if (type)    h += '<span class="filter-tag" onclick="clearFilter('type')">'+type+' x</span>';
-  if (q)       h += '<span class="filter-tag" onclick="clearFilter('search')">'+q+' x</span>';
+  if (country) h += '<span class="filter-tag" onclick="clearFilter(&quot;country&quot;)">'+country+' x</span>';
+  if (spot)    h += '<span class="filter-tag" onclick="clearFilter(&quot;spot&quot;)">'+spot+' x</span>';
+  if (type)    h += '<span class="filter-tag" onclick="clearFilter(&quot;type&quot;)">'+type+' x</span>';
+  if (q)       h += '<span class="filter-tag" onclick="clearFilter(&quot;search&quot;)">'+q+' x</span>';
   h += '<button class="clear-btn" onclick="clearAll()">Clear all</button>';
   af.innerHTML = h;
 }
