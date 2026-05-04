@@ -536,7 +536,8 @@ function renderList() {
     var rec = slice[i];
     var exp = rec.id === expandedId;
     var canEdit = true;
-    html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" onclick="toggleCard(&quot;' + rec.id + '&quot;)">';
+    var cardId = 'card_' + i;
+    html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" id="' + cardId + '" data-id="' + rec.id + '" onclick="toggleCard(\'' + cardId + '\',\'' + rec.id + '\')">';
     html += '<div class="record-top">';
     html += '<div class="record-left">';
     html += '<div class="reg-row">';
@@ -574,7 +575,7 @@ function renderList() {
   document.getElementById('pagination').innerHTML = pag;
 }
 
-function toggleCard(el) { var id = el.getAttribute("data-id"); expandedId = expandedId===id ? null : id; renderList(); }
+function toggleCard(cardId, recId) { expandedId = expandedId===recId ? null : recId; renderList(); }
 function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
 
 // MODAL
