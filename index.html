@@ -282,8 +282,10 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 <div class="toast" id="toast"></div>
 
 <script>
-var SB_URL = '""" + SUPABASE_URL + """';
-var SB_KEY = '""" + SUPABASE_KEY + """';
+var SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
+
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg';
+let SB_TOKEN = null;
 var SB_TOKEN = null;
 var currentUser = null;
 var db = [];
