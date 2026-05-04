@@ -534,7 +534,7 @@ function renderList() {
     var rec = slice[i];
     var exp = rec.id === expandedId;
     var canEdit = rec._mine && !rec._base;
-    html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" onclick="toggleCard('' + rec.id + '')">';
+    html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" onclick="toggleCard(&quot;' + rec.id + '&quot;)">';
     html += '<div class="record-top">';
     html += '<div class="record-left">';
     html += '<div class="reg-row">';
@@ -556,8 +556,8 @@ function renderList() {
     html += '</div>';
     if (canEdit) {
       html += '<div class="detail-actions">';
-      html += '<button class="btn-edit" onclick="editRecord(event,'' + rec.id + '')">EDIT</button>';
-      html += '<button class="btn-delete" onclick="deleteRecord(event,'' + rec.id + '')">Delete</button>';
+      html += '<button class="btn-edit" onclick="editFromCard(this)">EDIT</button>';
+      html += '<button class="btn-delete" onclick="deleteFromCard(this)">Delete</button>';
       html += '</div>';
     }
     html += '</div></div>';
@@ -572,7 +572,7 @@ function renderList() {
   document.getElementById('pagination').innerHTML = pag;
 }
 
-function toggleCard(id) { expandedId = expandedId===id ? null : id; renderList(); }
+function toggleCard(el) { var id = el.getAttribute("data-id"); expandedId = expandedId===id ? null : id; renderList(); }
 function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
 
 // MODAL
@@ -641,10 +641,196 @@ async function saveRecord() {
   } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
 }
 
-function editRecord(e, id) {
+function editFromCard(btn) { btn.stopPropagation ? btn.stopPropagation() : null; var id = btn.closest(".record-card").getAttribute("data-id"); for (var i=0; i<db.length; i++) { if (db[i].id===id) { openModal(db[i]); return; } } }
+
+async function deleteRecord(e, id) {
   e.stopPropagation();
-  for (var i=0; i<db.length; i++) { if (db[i].id===id) { openModal(db[i]); return; } }
+  if (!confirm('Delete this sighting?')) return;
+  try {
+    await sbDelete(id);
+    showToast('Sighting deleted');
+    await initApp();
+  } catch(e) { showToast('Delete failed: ' + e.message, 'error'); }
 }
+
+// TABS
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('tab-list').style.display  = tab==='list'  ? 'block' : 'none';
+  document.getElementById('tab-stats').style.display = tab==='stats' ? 'block' : 'none';
+  if (tab==='stats') renderStats();
+}
+
+function renderStats() {
+  var airlines={}, spotsMap={}, countriesMap={};
+  db.forEach(function(r) {
+    if(r.airline) airlines[r.airline]=(airlines[r.airline]||0)+1;
+    if(r.spot)    spotsMap[r.spot]=(spotsMap[r.spot]||0)+1;
+    if(r.country) countriesMap[r.country]=(countriesMap[r.country]||0)+1;
+  });
+  var topA = Object.entries(airlines).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var topS = Object.entries(spotsMap).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var topC = Object.entries(countriesMap).sort(function(a,b){return b[1]-a[1];}).slice(0,20);
+  var tA = new Set(db.map(function(r){return r.airline;}).filter(Boolean)).size;
+  var tS = new Set(db.map(function(r){return r.spot;}).filter(Boolean)).size;
+  var myCount = db.filter(function(r){return r._mine && !r._base;}).length;
+  var h = '';
+  h += '<div class="stats-bar" style="margin-bottom:20px">';
+  h += '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'+db.length+'</div><div class="stat-label">SIGHTINGS</div></div>';
+  h += '<div class="stat-card"><div class="stat-num" style="color:var(--warning)">'+tA+'</div><div class="stat-label">AIRLINES</div></div>';
+  h += '<div class="stat-card"><div class="stat-num" style="color:var(--success)">'+tS+'</div><div class="stat-label">AIRPORTS</div></div>';
+  h += '</div>';
+  h += '<div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">';
+  h += '<span style="font-family:Orbitron,sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span>';
+  h += '<span style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:var(--accent)">'+myCount+'</span>';
+  h += '</div>';
+  h += '<div class="stats-section"><h3>TOP AIRLINES</h3>';
+  topA.forEach(function(item) {
+    h += '<div class="bar-row"><div class="bar-meta"><span class="bar-name">'+item[0]+'</span><span class="bar-count" style="color:var(--warning)">'+item[1]+'</span></div>';
+    h += '<div class="bar-track"><div class="bar-fill" style="width:'+(item[1]/topA[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>';
+  });
+  h += '</div>';
+  h += '<div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3>';
+  topS.forEach(function(item) {
+    h += '<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:JetBrains Mono,monospace;font-weight:700">'+item[0]+'</span><span class="bar-count" style="color:var(--success)">'+item[1]+'</span></div>';
+    h += '<div class="bar-track"><div class="bar-fill" style="width:'+(item[1]/topS[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>';
+  });
+  h += '</div>';
+  h += '<div class="stats-section"><h3>BY COUNTRY</h3><div class="country-grid">';
+  topC.forEach(function(item) {
+    h += '<div class="country-item"><span class="country-name">'+item[0]+'</span><span class="country-count">'+item[1]+'</span></div>';
+  });
+  h += '</div></div>';
+  document.getElementById('tab-stats').innerHTML = h;
+}
+
+window.addEventListener('load', async function() {
+  var ok = await sbGetSession();
+  if (ok) await initApp();
+});
+</script>
+</body>
+</html// -- Render list
+function renderList() {
+  var totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  var slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
+  var list  = document.getElementById('record-list');
+  if (!slice.length) {
+    list.innerHTML='<div class="empty-state">NO SIGHTINGS FOUND</div>';
+    document.getElementById('pagination').innerHTML='';
+    return;
+  }
+  var html = '';
+  for (var i=0; i<slice.length; i++) {
+    var rec = slice[i];
+    var exp = rec.id === expandedId;
+    var canEdit = rec._mine && !rec._base;
+    var cardClass = 'record-card' + (exp?' expanded':'') + (rec._mine?' mine':'');
+    html += '<div class="'+cardClass+'" onclick="toggleCard(this)" data-id="'+rec.id+'">';
+    html += '<div class="record-top"><div class="record-left">';
+    html += '<div class="reg-row"><span class="record-reg">'+rec.registration+'</span>';
+    if (rec.ops) html += '<span class="ops-badge">'+rec.ops+'</span>';
+    if (rec._mine && !rec._base) html += '<span class="my-badge">MY LOG</span>';
+    html += '</div>';
+    html += '<div class="record-airline">'+fmt(rec.airline)+'</div>';
+    html += '<div class="record-type">'+fmt(rec.type)+'</div>';
+    html += '</div><div class="record-right">';
+    html += '<div class="record-spot">'+fmt(rec.spot)+'</div>';
+    html += '<div class="record-date">'+fmt(rec.date)+'</div>';
+    html += '</div></div>';
+    html += '<div class="record-detail"><div class="detail-grid">';
+    html += '<div><div class="detail-key">TYPE</div><div class="detail-val">'+fmt(rec.type)+'</div></div>';
+    html += '<div><div class="detail-key">COUNTRY</div><div class="detail-val">'+fmt(rec.country)+'</div></div>';
+    html += '</div>';
+    if (canEdit) {
+      html += '<div class="detail-actions">';
+      html += '<button class="btn-edit" onclick="editFromCard(this)">EDIT</button>';
+      html += '<button class="btn-delete" onclick="deleteFromCard(this)">Delete</button>';
+      html += '</div>';
+    }
+    html += '</div></div>';
+  }
+  list.innerHTML = html;
+  var pag = '';
+  if (totalPages > 1) {
+    pag += '<button class="page-btn" onclick="changePage(-1)"'+(page===0?' disabled':'')+'>&#8249;</button>';
+    pag += '<span class="page-info">'+(page+1)+' / '+totalPages+'</span>';
+    pag += '<button class="page-btn" onclick="changePage(1)"'+(page>=totalPages-1?' disabled':'')+'>&#8250;</button>';
+  }
+  document.getElementById('pagination').innerHTML = pag;
+}
+
+function toggleCard(el) { var id = el.getAttribute("data-id"); expandedId = expandedId===id ? null : id; renderList(); }
+function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
+
+// MODAL
+function openModal(rec) {
+  document.getElementById('edit-id').value   = rec ? rec.id : '';
+  document.getElementById('modal-title').textContent = rec ? 'EDIT SIGHTING' : 'LOG NEW SIGHTING';
+  document.getElementById('f-reg').value     = rec ? rec.registration : '';
+  document.getElementById('f-airline').value = rec ? rec.airline : '';
+  document.getElementById('f-type').value    = rec ? rec.type : '';
+  document.getElementById('f-ops').value     = rec ? rec.ops : '';
+  document.getElementById('f-spot').value    = rec ? rec.spot : '';
+  document.getElementById('f-date').value    = rec ? rec.date : '';
+  document.getElementById('f-country').value = rec ? rec.country : '';
+  document.getElementById('dup-warn').style.display = 'none';
+  document.getElementById('save-btn').disabled = false;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function checkDup() {
+  var reg    = document.getElementById('f-reg').value.trim().toUpperCase();
+  var editId = document.getElementById('edit-id').value;
+  var warn   = document.getElementById('dup-warn');
+  var btn    = document.getElementById('save-btn');
+  if (!reg || editId) { warn.style.display='none'; btn.disabled=false; return; }
+  var found = null;
+  for (var i=0; i<db.length; i++) {
+    if (db[i].registration.toUpperCase() === reg) { found = db[i]; break; }
+  }
+  if (found) {
+    warn.textContent = 'WARNING: ' + reg + ' already exists — ' + (found.airline||'Unknown') + ', ' + (found.type||'Unknown type') + ', spotted at ' + (found.spot||'?') + ' on ' + (found.date||'?');
+    warn.style.display = 'block';
+    btn.disabled = true;
+  } else {
+    warn.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+async function saveRecord() {
+  var reg = document.getElementById('f-reg').value.trim().toUpperCase();
+  if (!reg) { alert('Registration is required'); return; }
+  var editId = document.getElementById('edit-id').value;
+  if (!editId) {
+    for (var i=0; i<db.length; i++) {
+      if (db[i].registration.toUpperCase() === reg) return;
+    }
+  }
+  var payload = {
+    user_id: currentUser.id,
+    registration: reg,
+    airline: document.getElementById('f-airline').value.trim(),
+    type: document.getElementById('f-type').value.trim(),
+    ops: document.getElementById('f-ops').value.trim().toUpperCase(),
+    spot: document.getElementById('f-spot').value.trim().toUpperCase(),
+    date: document.getElementById('f-date').value,
+    country: document.getElementById('f-country').value,
+    is_base: false
+  };
+  try {
+    if (editId) { await sbUpdate(editId, payload); }
+    else { await sbInsert(payload); }
+    showToast(editId ? 'Sighting updated' : 'Sighting logged');
+    closeModal();
+    await initApp();
+  } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
+}
+
+function editFromCard(btn) { btn.stopPropagation ? btn.stopPropagation() : null; var id = btn.closest(".record-card").getAttribute("data-id"); for (var i=0; i<db.length; i++) { if (db[i].id===id) { openModal(db[i]); return; } } }
 
 async function deleteRecord(e, id) {
   e.stopPropagation();
