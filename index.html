@@ -8,104 +8,61 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0e1a;--surface:#111827;--card:#161e2e;--border:#1e2d45;
-  --accent:#00c2ff;--accent-dim:#005e7a;--accent-glow:rgba(0,194,255,0.15);
-  --text:#e2eaf5;--muted:#5a7090;--warning:#f59e0b;--success:#10b981;
-  --red:#ef4444;--tag:#1a2942;
-}
+:root{--bg:#0a0e1a;--surface:#111827;--card:#161e2e;--border:#1e2d45;--accent:#00c2ff;--accent-dim:#005e7a;--accent-glow:rgba(0,194,255,0.15);--text:#e2eaf5;--muted:#5a7090;--warning:#f59e0b;--success:#10b981;--red:#ef4444;--tag:#1a2942}
 body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
-.screen{display:none;min-height:100vh}
-.screen.active{display:flex}
-/* LOGIN */
-#screen-login{flex-direction:column;align-items:center;justify-content:center;padding:24px;
-  background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.08) 0%,transparent 70%),
-  linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);position:relative;overflow:hidden}
-#screen-login::before{content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:linear-gradient(rgba(0,194,255,0.03) 1px,transparent 1px),
-  linear-gradient(90deg,rgba(0,194,255,0.03) 1px,transparent 1px);background-size:40px 40px}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;
-  padding:36px 28px;width:100%;max-width:380px;position:relative;z-index:1;
-  box-shadow:0 0 60px rgba(0,194,255,0.1),0 20px 60px rgba(0,0,0,0.5)}
+.screen{display:none;min-height:100vh}.screen.active{display:flex}
+#screen-login{flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(0,194,255,0.08) 0%,transparent 70%),linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);position:relative;overflow:hidden}
+#screen-login::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(0,194,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,255,0.03) 1px,transparent 1px);background-size:40px 40px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 28px;width:100%;max-width:380px;position:relative;z-index:1;box-shadow:0 0 60px rgba(0,194,255,0.1),0 20px 60px rgba(0,0,0,0.5)}
 .login-logo{text-align:center;margin-bottom:32px}
 .login-logo .icon{font-size:48px;display:block;margin-bottom:12px;filter:drop-shadow(0 0 20px var(--accent))}
-.login-logo h1{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--accent);
-  letter-spacing:0.15em;text-shadow:0 0 20px var(--accent)}
+.login-logo h1{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:var(--accent);letter-spacing:0.15em;text-shadow:0 0 20px var(--accent)}
 .login-logo p{color:var(--muted);font-size:11px;letter-spacing:0.1em;margin-top:6px;font-family:'Orbitron',sans-serif}
 .field{margin-bottom:16px}
-.field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;
-  letter-spacing:0.12em;margin-bottom:6px}
-.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  color:var(--text);padding:12px 14px;font-size:15px;font-family:'JetBrains Mono',monospace;
-  outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
+.field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.12em;margin-bottom:6px}
+.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 14px;font-size:15px;font-family:'JetBrains Mono',monospace;outline:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
 .field input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px rgba(0,194,255,0.1)}
-.btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;
-  color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;
-  cursor:pointer;box-shadow:0 0 20px rgba(0,194,255,0.3);transition:opacity .2s}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-primary:active{opacity:.85}
-.msg-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;
-  color:var(--red);padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
+.btn-primary{width:100%;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#000;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.1em;cursor:pointer;box-shadow:0 0 20px rgba(0,194,255,0.3);transition:opacity .2s}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}.btn-primary:active{opacity:.85}
+.msg-error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:var(--red);padding:10px 14px;font-size:13px;margin-top:12px;text-align:center;display:none}
 .msg-info{color:var(--muted);font-size:11px;text-align:center;margin-top:16px;line-height:1.6}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.3);
-  border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,0.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* APP */
 #screen-app{flex-direction:column}
 .app-wrap{max-width:600px;margin:0 auto;width:100%;padding-bottom:32px}
-.app-header{background:linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);
-  border-bottom:1px solid var(--border);padding:16px 16px 0;position:sticky;top:0;z-index:100}
+.app-header{background:linear-gradient(180deg,#0d1929 0%,var(--bg) 100%);border-bottom:1px solid var(--border);padding:16px 16px 0;position:sticky;top:0;z-index:100}
 .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:6px}
-.header-title h1{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;
-  letter-spacing:0.1em;color:var(--accent);text-shadow:0 0 20px var(--accent)}
+.header-title h1{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;letter-spacing:0.1em;color:var(--accent);text-shadow:0 0 20px var(--accent)}
 .header-title p{color:var(--muted);font-size:10px;margin-top:2px;letter-spacing:0.05em}
 .header-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.btn-add{background:var(--accent);border:none;border-radius:10px;color:#000;padding:9px 12px;
-  cursor:pointer;font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;
-  letter-spacing:0.05em;box-shadow:0 0 16px var(--accent-glow)}
-.btn-icon{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);
-  padding:9px 11px;cursor:pointer;font-size:14px;line-height:1}
-.user-pill{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;
-  background:var(--surface);border:1px solid var(--border);border-radius:6px;
-  padding:4px 7px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-add{background:var(--accent);border:none;border-radius:10px;color:#000;padding:9px 12px;cursor:pointer;font-family:'Orbitron',sans-serif;font-weight:700;font-size:11px;letter-spacing:0.05em;box-shadow:0 0 16px var(--accent-glow)}
+.btn-icon{background:none;border:1px solid var(--border);border-radius:10px;color:var(--muted);padding:9px 11px;cursor:pointer;font-size:14px;line-height:1}
+.user-pill{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 7px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tabs{display:flex}
-.tab-btn{flex:1;padding:10px 0;border:none;background:none;color:var(--muted);
-  border-bottom:2px solid transparent;font-family:'Orbitron',sans-serif;font-size:11px;
-  letter-spacing:0.1em;cursor:pointer;transition:all .2s}
+.tab-btn{flex:1;padding:10px 0;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:0.1em;cursor:pointer;transition:all .2s}
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 .content{padding:16px}
-.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;
-  color:var(--text);padding:10px 14px;font-size:14px;font-family:'JetBrains Mono',monospace;
-  outline:none;margin-bottom:10px;-webkit-appearance:none}
+.search-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 14px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none;margin-bottom:10px;-webkit-appearance:none}
 .filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;
-  color:var(--text);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;
-  outline:none;width:100%;cursor:pointer;-webkit-appearance:none}
+.filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:8px 10px;font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;width:100%;cursor:pointer;-webkit-appearance:none}
 .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
 .stat-num{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900}
 .stat-label{color:var(--muted);font-size:9px;letter-spacing:0.08em;margin-top:2px;font-family:'Orbitron',sans-serif}
 .active-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-.filter-tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;
-  background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);cursor:pointer}
+.filter-tag{display:inline-block;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);cursor:pointer}
 .clear-btn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer}
 .record-list{display:grid;gap:8px}
-.record-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:12px 14px;cursor:pointer;transition:border-color .2s;-webkit-tap-highlight-color:transparent}
-.record-card.expanded{border-color:var(--accent)}
-.record-card.mine{border-left:3px solid var(--accent)}
+.record-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .2s;-webkit-tap-highlight-color:transparent}
+.record-card.expanded{border-color:var(--accent)}.record-card.mine{border-left:3px solid var(--accent)}
 .record-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .record-left{flex:1;min-width:0}
 .reg-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .record-reg{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent);font-size:15px}
-.ops-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;
-  background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap}
-.my-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;
-  background:rgba(0,194,255,0.1);color:var(--accent);border:1px solid var(--accent-dim);
-  white-space:nowrap;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
+.ops-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:var(--tag);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap}
+.my-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;background:rgba(0,194,255,0.1);color:var(--accent);border:1px solid var(--accent-dim);white-space:nowrap;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
 .record-airline{color:var(--text);font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.record-type{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;
-  margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
+.record-type{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.8}
 .record-right{text-align:right;flex-shrink:0}
 .record-spot{color:var(--warning);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
 .record-date{color:var(--muted);font-size:11px;margin-top:2px}
@@ -115,69 +72,42 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 .detail-key{color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.1em}
 .detail-val{color:var(--text);font-size:13px;font-family:'JetBrains Mono',monospace;margin-top:2px}
 .detail-actions{display:flex;gap:8px}
-.btn-edit{flex:1;padding:8px;border-radius:8px;cursor:pointer;background:none;
-  border:1px solid var(--accent-dim);color:var(--accent);font-size:12px;font-family:'Orbitron',sans-serif}
-.btn-delete{padding:8px 14px;border-radius:8px;cursor:pointer;background:none;
-  border:1px solid rgba(239,68,68,0.3);color:var(--red);font-size:13px}
+.btn-edit{flex:1;padding:8px;border-radius:8px;cursor:pointer;background:none;border:1px solid var(--accent-dim);color:var(--accent);font-size:12px;font-family:'Orbitron',sans-serif}
+.btn-delete{padding:8px 14px;border-radius:8px;cursor:pointer;background:none;border:1px solid rgba(239,68,68,0.3);color:var(--red);font-size:13px}
 .pagination{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px}
-.page-btn{background:var(--card);border:1px solid var(--border);color:var(--text);
-  border-radius:8px;padding:8px 16px;cursor:pointer;font-size:16px}
+.page-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:16px}
 .page-btn:disabled{opacity:.35;cursor:not-allowed}
 .page-info{color:var(--muted);font-size:13px;font-family:'JetBrains Mono',monospace}
-.empty-state{text-align:center;color:var(--muted);padding:48px 0;font-family:'Orbitron',sans-serif;
-  font-size:12px;letter-spacing:0.1em}
-/* STATS */
+.empty-state{text-align:center;color:var(--muted);padding:48px 0;font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:0.1em}
 .stats-section{margin-bottom:24px}
-.stats-section h3{font-family:'Orbitron',sans-serif;color:var(--accent);font-size:12px;
-  margin-bottom:12px;letter-spacing:0.1em}
-.bar-row{margin-bottom:10px}
-.bar-meta{display:flex;justify-content:space-between;margin-bottom:4px}
+.stats-section h3{font-family:'Orbitron',sans-serif;color:var(--accent);font-size:12px;margin-bottom:12px;letter-spacing:0.1em}
+.bar-row{margin-bottom:10px}.bar-meta{display:flex;justify-content:space-between;margin-bottom:4px}
 .bar-name{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:75%}
 .bar-count{font-family:'JetBrains Mono',monospace;font-size:13px}
-.bar-track{background:var(--border);border-radius:4px;height:4px}
-.bar-fill{height:100%;border-radius:4px}
+.bar-track{background:var(--border);border-radius:4px;height:4px}.bar-fill{height:100%;border-radius:4px}
 .country-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.country-item{background:var(--card);border:1px solid var(--border);border-radius:8px;
-  padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
+.country-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center}
 .country-name{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:72%}
 .country-count{font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:12px;font-weight:700}
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;
-  align-items:center;justify-content:center;z-index:1000;padding:16px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px}
 .modal-overlay.open{display:flex}
-.modal-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;
-  width:100%;max-width:480px;box-shadow:0 0 40px var(--accent-glow);max-height:90vh;overflow-y:auto}
+.modal-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 0 40px var(--accent-glow);max-height:90vh;overflow-y:auto}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .modal-title{color:var(--accent);font-family:'Orbitron',sans-serif;font-size:15px}
 .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px}
 .modal-fields{display:grid;gap:12px}
-.modal-field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;
-  letter-spacing:0.1em;margin-bottom:5px}
-.modal-field input,.modal-field select{width:100%;background:var(--surface);border:1px solid var(--border);
-  border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;
-  font-family:'JetBrains Mono',monospace;outline:none;-webkit-appearance:none}
+.modal-field label{display:block;color:var(--muted);font-size:10px;font-family:'Orbitron',sans-serif;letter-spacing:0.1em;margin-bottom:5px}
+.modal-field input,.modal-field select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'JetBrains Mono',monospace;outline:none;-webkit-appearance:none}
 .modal-actions{display:flex;gap:8px;margin-top:20px}
-.btn-cancel{flex:1;padding:11px;border-radius:8px;cursor:pointer;background:none;
-  border:1px solid var(--border);color:var(--muted);font-size:13px}
-.btn-save{flex:2;padding:11px;border-radius:8px;cursor:pointer;background:var(--accent);
-  border:none;color:#000;font-size:13px;font-weight:700;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
+.btn-cancel{flex:1;padding:11px;border-radius:8px;cursor:pointer;background:none;border:1px solid var(--border);color:var(--muted);font-size:13px}
+.btn-save{flex:2;padding:11px;border-radius:8px;cursor:pointer;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;font-family:'Orbitron',sans-serif;letter-spacing:0.05em}
 .btn-save:disabled{opacity:.4;cursor:not-allowed}
-.dup-warn{display:none;margin-top:14px;background:rgba(245,158,11,0.1);
-  border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:12px 14px;
-  font-size:12px;color:var(--warning);line-height:1.6}
-/* TOAST */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;
-  font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);
-  transition:transform .3s ease;z-index:2000;white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.success{border-color:var(--success);color:var(--success)}
-.toast.error{border-color:var(--red);color:var(--red)}
+.dup-warn{display:none;margin-top:14px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--warning);line-height:1.6}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);transition:transform .3s ease;z-index:2000;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}.toast.success{border-color:var(--success);color:var(--success)}.toast.error{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
 
 <div id="screen-login" class="screen active">
   <div class="login-card">
@@ -187,12 +117,12 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
       <p>CIVIL AIRLINER DATABASE</p>
     </div>
     <div class="field">
-      <label for="login-email">EMAIL</label>
-      <input type="email" id="login-email" placeholder="your@email.com" autocomplete="email" autocapitalize="none" />
+      <label for="lu">USERNAME</label>
+      <input type="text" id="lu" placeholder="Username" autocomplete="username" autocapitalize="none" />
     </div>
     <div class="field">
-      <label for="login-pass">PASSWORD</label>
-      <input type="password" id="login-pass" placeholder="Password" autocomplete="current-password" />
+      <label for="lp">PASSWORD</label>
+      <input type="password" id="lp" placeholder="Password" autocomplete="current-password" />
     </div>
     <button class="btn-primary" id="login-btn" onclick="doLogin()">SIGN IN</button>
     <div class="msg-error" id="login-error"></div>
@@ -200,16 +130,11 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
   </div>
 </div>
 
-<!-- APP -->
-
 <div id="screen-app" class="screen">
   <div class="app-wrap">
     <div class="app-header">
       <div class="header-top">
-        <div class="header-title">
-          <h1>&#9992; SPOTTER DB</h1>
-          <p>CIVIL AIRLINER DATABASE</p>
-        </div>
+        <div class="header-title"><h1>&#9992; SPOTTER DB</h1><p>CIVIL AIRLINER DATABASE</p></div>
         <div class="header-actions">
           <span class="user-pill" id="user-pill"></span>
           <button class="btn-add" onclick="openModal()">+ LOG</button>
@@ -221,36 +146,27 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
         <button class="tab-btn" onclick="switchTab('stats',this)">STATS</button>
       </div>
     </div>
-
-```
-<div class="content" id="tab-list">
-  <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()" />
-  <div class="filters">
-    <select class="filter-select" id="filter-country" onchange="applyFilters()"><option value="">Country</option></select>
-    <select class="filter-select" id="filter-spot" onchange="applyFilters()"><option value="">Airport</option></select>
-    <select class="filter-select" id="filter-type" onchange="applyFilters()"><option value="">Type</option></select>
-    <select class="filter-select" id="sort-by" onchange="onSort()">
-      <option value="reg">Reg A to Z</option>
-      <option value="regdesc">Reg Z to A</option>
-      <option value="date">Date</option>
-      <option value="airline">Airline</option>
-    </select>
-  </div>
-  <div class="stats-bar" id="stats-bar"></div>
-  <div class="active-filters" id="active-filters" style="display:none"></div>
-  <div class="record-list" id="record-list">
-    <div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">Loading...</div>
-  </div>
-  <div class="pagination" id="pagination"></div>
-</div>
-
-<div class="content" id="tab-stats" style="display:none"></div>
-```
-
+    <div class="content" id="tab-list">
+      <input class="search-input" type="search" id="search-box" placeholder="Search registration, airline, type..." oninput="applyFilters()" />
+      <div class="filters">
+        <select class="filter-select" id="filter-country" onchange="applyFilters()"><option value="">Country</option></select>
+        <select class="filter-select" id="filter-spot" onchange="applyFilters()"><option value="">Airport</option></select>
+        <select class="filter-select" id="filter-type" onchange="applyFilters()"><option value="">Type</option></select>
+        <select class="filter-select" id="sort-by" onchange="onSort()">
+          <option value="reg">Reg A to Z</option>
+          <option value="regdesc">Reg Z to A</option>
+          <option value="date">Date</option>
+          <option value="airline">Airline</option>
+        </select>
+      </div>
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="active-filters" id="active-filters" style="display:none"></div>
+      <div class="record-list" id="record-list"><div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">Loading...</div></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    <div class="content" id="tab-stats" style="display:none"></div>
   </div>
 </div>
-
-<!-- LOG / EDIT MODAL -->
 
 <div class="modal-overlay" id="modal">
   <div class="modal-card">
@@ -260,10 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
     </div>
     <div class="modal-fields">
       <input type="hidden" id="edit-id" />
-      <div class="modal-field">
-        <label>REGISTRATION *</label>
-        <input type="text" id="f-reg" placeholder="e.g. G-BOAC" oninput="checkDup()" autocapitalize="characters" />
-      </div>
+      <div class="modal-field"><label>REGISTRATION *</label><input type="text" id="f-reg" placeholder="e.g. G-BOAC" oninput="checkDup()" autocapitalize="characters" /></div>
       <div class="modal-field"><label>AIRLINE</label><input type="text" id="f-airline" placeholder="e.g. British Airways" /></div>
       <div class="modal-field"><label>AIRCRAFT TYPE</label><input type="text" id="f-type" placeholder="e.g. 747-436" /></div>
       <div class="modal-field"><label>ICAO CODE (OPS)</label><input type="text" id="f-ops" placeholder="e.g. BAW" /></div>
@@ -282,71 +195,77 @@ body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min
 <div class="toast" id="toast"></div>
 
 <script>
-var SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
+// ── Credentials (SHA-256 hashed passwords) ────────────────────────
+// Username: spotter1  Password: Airbus2024!
+// Username: spotter2  Password: Boeing2024!
+var USERS = {
+  "spotter1": "42c40cc517d17386837c3829db72ff1923d69fd5e4719b8a59169ca41b49f860",
+  "spotter2": "00dd3379a6c966636036ba074cd402c315c77b4ab74187ad67882e49bbdee690"
+};
 
+// ── Supabase (anon key only - no auth endpoint used) ──────────────
+var SB_URL = 'https://azjgmnieyidwwzekhoxh.supabase.co';
 var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6amdtbmlleWlkd3d6ZWtob3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODg0MjUsImV4cCI6MjA5MjQ2NDQyNX0.d3hUN-3HCh6zxqoxOpJMH2G_IqCM8nJh1ISow4x_iQg';
-let SB_TOKEN = null;
-var SB_TOKEN = null;
-var currentUser = null;
-var db = [];
-var filtered = [];
-var page = 0;
-var sortBy = 'reg';
-var expandedId = null;
+
+// ── State ─────────────────────────────────────────────────────────
+var db = [], filtered = [], page = 0, sortBy = 'reg', expandedId = null;
+var currentUsername = null;
 var PAGE_SIZE = 200;
 
+// ── SHA-256 ───────────────────────────────────────────────────────
+async function sha256(msg) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+
+// ── Login ─────────────────────────────────────────────────────────
+async function doLogin() {
+  var u   = document.getElementById('lu').value.trim().toLowerCase();
+  var p   = document.getElementById('lp').value;
+  var btn = document.getElementById('login-btn');
+  var err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!u || !p) { err.textContent='Please enter username and password'; err.style.display='block'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
+  var hash = await sha256(p);
+  if (USERS[u] && USERS[u] === hash) {
+    currentUsername = u;
+    sessionStorage.setItem('spotterUser', u);
+    await initApp();
+  } else {
+    err.textContent = 'Incorrect username or password';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'SIGN IN';
+    document.getElementById('lp').value = '';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('spotterUser');
+  currentUsername = null;
+  db = []; filtered = [];
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('lp').value = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'SIGN IN';
+}
+
+document.getElementById('lp').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+document.getElementById('lu').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+// ── Supabase REST (anon key - no auth token needed for reading) ───
 function sbHeaders() {
-  return {
-    'apikey': SB_KEY,
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + (SB_TOKEN || SB_KEY)
-  };
-}
-
-async function sbFetch(path, opts) {
-  opts = opts || {};
-  opts.headers = Object.assign(sbHeaders(), opts.headers || {});
-  var res = await fetch(SB_URL + path, opts);
-  var text = await res.text();
-  var json = text ? JSON.parse(text) : {};
-  if (!res.ok) throw new Error(json.error_description || json.message || json.msg || 'Request failed');
-  return json;
-}
-
-async function sbSignIn(email, pass) {
-  var data = await sbFetch('/auth/v1/token?grant_type=password', {
-    method: 'POST',
-    body: JSON.stringify({ email: email, password: pass })
-  });
-  SB_TOKEN = data.access_token;
-  currentUser = data.user;
-  sessionStorage.setItem('sb_token', SB_TOKEN);
-  sessionStorage.setItem('sb_user', JSON.stringify(currentUser));
-  return data;
-}
-
-async function sbSignOut() {
-  try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
-  SB_TOKEN = null;
-  currentUser = null;
-  sessionStorage.removeItem('sb_token');
-  sessionStorage.removeItem('sb_user');
-}
-
-async function sbGetSession() {
-  var token = sessionStorage.getItem('sb_token');
-  var user  = sessionStorage.getItem('sb_user');
-  if (token && user) { SB_TOKEN = token; currentUser = JSON.parse(user); return true; }
-  return false;
+  return { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 }
 
 async function sbSelectAll() {
   var all = [], from = 0, limit = 1000;
   while (true) {
-    var res = await fetch(
-      SB_URL + '/rest/v1/sightings?order=registration.asc&limit=' + limit + '&offset=' + from,
-      { headers: sbHeaders() }
-    );
+    var res = await fetch(SB_URL + '/rest/v1/sightings?order=registration.asc&limit=' + limit + '&offset=' + from, { headers: sbHeaders() });
+    if (!res.ok) { var t = await res.text(); throw new Error(t); }
     var batch = await res.json();
     if (!Array.isArray(batch) || batch.length === 0) break;
     all = all.concat(batch);
@@ -357,117 +276,74 @@ async function sbSelectAll() {
 }
 
 async function sbInsert(row) {
-  return await sbFetch('/rest/v1/sightings', {
-    method: 'POST',
-    body: JSON.stringify(row),
-    headers: { 'Prefer': 'return=representation' }
+  var res = await fetch(SB_URL + '/rest/v1/sightings', {
+    method: 'POST', headers: Object.assign({}, sbHeaders(), {'Prefer':'return=representation'}),
+    body: JSON.stringify(row)
   });
+  if (!res.ok) { var t = await res.text(); throw new Error(t); }
+  return await res.json();
 }
 
 async function sbUpdate(id, row) {
-  return await sbFetch('/rest/v1/sightings?id=eq.' + id, {
-    method: 'PATCH',
-    body: JSON.stringify(row),
-    headers: { 'Prefer': 'return=representation' }
+  var res = await fetch(SB_URL + '/rest/v1/sightings?id=eq.' + id, {
+    method: 'PATCH', headers: Object.assign({}, sbHeaders(), {'Prefer':'return=representation'}),
+    body: JSON.stringify(row)
   });
+  if (!res.ok) { var t = await res.text(); throw new Error(t); }
+  return await res.json();
 }
 
 async function sbDelete(id) {
-  return await sbFetch('/rest/v1/sightings?id=eq.' + id, { method: 'DELETE' });
+  var res = await fetch(SB_URL + '/rest/v1/sightings?id=eq.' + id, { method: 'DELETE', headers: sbHeaders() });
+  if (!res.ok) { var t = await res.text(); throw new Error(t); }
 }
 
+// ── Toast ─────────────────────────────────────────────────────────
 function showToast(msg, type) {
   var el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast ' + (type || 'success');
   void el.offsetWidth;
   el.classList.add('show');
-  setTimeout(function() { el.classList.remove('show'); }, 3000);
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
 }
 
 function fmt(v) { return v || '---'; }
 
-// AUTH
-async function doLogin() {
-  var email = document.getElementById('login-email').value.trim();
-  var pass  = document.getElementById('login-pass').value;
-  var btn   = document.getElementById('login-btn');
-  var err   = document.getElementById('login-error');
-  err.style.display = 'none';
-  if (!email || !pass) {
-    err.textContent = 'Please enter email and password';
-    err.style.display = 'block';
-    return;
-  }
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
-  try {
-    await sbSignIn(email, pass);
-    await initApp();
-  } catch(e) {
-    err.textContent = e.message;
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'SIGN IN';
-  }
-}
-
-async function doLogout() {
-  await sbSignOut();
-  db = []; filtered = [];
-  document.getElementById('screen-app').classList.remove('active');
-  document.getElementById('screen-login').classList.add('active');
-  document.getElementById('login-pass').value = '';
-  document.getElementById('login-btn').disabled = false;
-  document.getElementById('login-btn').textContent = 'SIGN IN';
-}
-
-document.getElementById('login-pass').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
-document.getElementById('login-email').addEventListener('keydown', function(e) { if(e.key==='Enter') doLogin(); });
-
-// INIT
+// ── Init app ──────────────────────────────────────────────────────
 async function initApp() {
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
-  document.getElementById('user-pill').textContent = currentUser.email.split('@')[0].toUpperCase();
+  document.getElementById('user-pill').textContent = currentUsername.toUpperCase();
   document.getElementById('record-list').innerHTML = '<div style="text-align:center;color:var(--muted);padding:48px 0;font-size:13px">Loading database...</div>';
   try {
     var rows = await sbSelectAll();
     db = rows.map(function(r) {
       return {
-        id: r.id,
-        airline: r.airline || '',
-        registration: r.registration || '',
-        type: r.type || '',
-        ops: r.ops || '',
-        spot: r.spot || '',
-        date: r.date || '',
-        country: r.country || '',
-        _mine: r.user_id === currentUser.id,
+        id: r.id, airline: r.airline||'', registration: r.registration||'',
+        type: r.type||'', ops: r.ops||'', spot: r.spot||'',
+        date: r.date||'', country: r.country||'',
+        _mine: r.logged_by === currentUsername,
         _base: r.is_base === true
       };
     });
   } catch(e) {
-    showToast('Failed to load: ' + e.message, 'error');
+    showToast('Load failed: ' + e.message, 'error');
     db = [];
   }
   populateFilters();
   applyFilters();
 }
 
-// FILTERS
+// ── Filters ───────────────────────────────────────────────────────
 function populateFilters() {
   var countries = [...new Set(db.map(function(r){return r.country;}).filter(Boolean))].sort();
   var spots     = [...new Set(db.map(function(r){return r.spot;}).filter(Boolean))].sort();
   var types     = [...new Set(db.map(function(r){return r.type;}).filter(Boolean))].sort();
-  document.getElementById('filter-country').innerHTML =
-    '<option value="">Country</option>' + countries.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
-  document.getElementById('filter-spot').innerHTML =
-    '<option value="">Airport</option>' + spots.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
-  document.getElementById('filter-type').innerHTML =
-    '<option value="">Type</option>' + types.map(function(t){return '<option value="'+t+'">'+t+'</option>';}).join('');
-  document.getElementById('f-country').innerHTML =
-    '<option value="">Select country...</option>' + countries.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  document.getElementById('filter-country').innerHTML = '<option value="">Country</option>' + countries.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  document.getElementById('filter-spot').innerHTML    = '<option value="">Airport</option>'  + spots.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+  document.getElementById('filter-type').innerHTML    = '<option value="">Type</option>'     + types.map(function(t){return '<option value="'+t+'">'+t+'</option>';}).join('');
+  document.getElementById('f-country').innerHTML      = '<option value="">Select country...</option>' + countries.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
 }
 
 function applyFilters() {
@@ -476,13 +352,13 @@ function applyFilters() {
   var spot    = document.getElementById('filter-spot').value;
   var type    = document.getElementById('filter-type').value;
   filtered = db.filter(function(r) {
-    if (q && !Object.values(r).some(function(v){return String(v||'').toLowerCase().indexOf(q) >= 0;})) return false;
+    if (q && !Object.values(r).some(function(v){return String(v||'').toLowerCase().indexOf(q)>=0;})) return false;
     if (country && r.country !== country) return false;
     if (spot && r.spot !== spot) return false;
     if (type && r.type !== type) return false;
     return true;
   });
-  filtered.sort(function(a,b) {
+  filtered.sort(function(a,b){
     if (sortBy==='reg')     return (a.registration||'').localeCompare(b.registration||'');
     if (sortBy==='regdesc') return (b.registration||'').localeCompare(a.registration||'');
     if (sortBy==='date')    return (b.date||'').localeCompare(a.date||'');
@@ -500,8 +376,8 @@ function renderStatsBar(q, country, spot, type) {
   var airlines = new Set(filtered.map(function(r){return r.airline;}).filter(Boolean)).size;
   var spots2   = new Set(filtered.map(function(r){return r.spot;}).filter(Boolean)).size;
   document.getElementById('stats-bar').innerHTML =
-    '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'+filtered.length+'</div><div class="stat-label">SIGHTINGS</div></div>' +
-    '<div class="stat-card"><div class="stat-num" style="color:var(--warning)">'+airlines+'</div><div class="stat-label">AIRLINES</div></div>' +
+    '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'+filtered.length+'</div><div class="stat-label">SIGHTINGS</div></div>'+
+    '<div class="stat-card"><div class="stat-num" style="color:var(--warning)">'+airlines+'</div><div class="stat-label">AIRLINES</div></div>'+
     '<div class="stat-card"><div class="stat-num" style="color:var(--success)">'+spots2+'</div><div class="stat-label">AIRPORTS</div></div>';
   var af = document.getElementById('active-filters');
   if (!q && !country && !spot && !type) { af.style.display='none'; return; }
@@ -522,51 +398,42 @@ function clearFilter(t) {
   if(t==='search')  document.getElementById('search-box').value='';
   applyFilters();
 }
-
 function clearAll() {
   ['filter-country','filter-spot','filter-type','search-box'].forEach(function(id){document.getElementById(id).value='';});
   applyFilters();
 }
 
-// LIST
+// ── Render list ───────────────────────────────────────────────────
 function renderList() {
   var totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   var slice = filtered.slice(page*PAGE_SIZE, (page+1)*PAGE_SIZE);
   var list  = document.getElementById('record-list');
-  if (!slice.length) {
-    list.innerHTML = '<div class="empty-state">NO SIGHTINGS FOUND</div>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
-  }
+  if (!slice.length) { list.innerHTML='<div class="empty-state">NO SIGHTINGS FOUND</div>'; document.getElementById('pagination').innerHTML=''; return; }
   var html = '';
   for (var i=0; i<slice.length; i++) {
     var rec = slice[i];
     var exp = rec.id === expandedId;
     var canEdit = rec._mine && !rec._base;
-    html += '<div class="record-card' + (exp?' expanded':'') + (rec._mine?' mine':'') + '" onclick="toggleCard('' + rec.id + '')">';
-    html += '<div class="record-top">';
-    html += '<div class="record-left">';
-    html += '<div class="reg-row">';
-    html += '<span class="record-reg">' + rec.registration + '</span>';
-    if (rec.ops) html += '<span class="ops-badge">' + rec.ops + '</span>';
+    html += '<div class="record-card'+(exp?' expanded':'')+(rec._mine?' mine':'')+'" onclick="toggleCard(''+rec.id+'')">';
+    html += '<div class="record-top"><div class="record-left">';
+    html += '<div class="reg-row"><span class="record-reg">'+rec.registration+'</span>';
+    if (rec.ops) html += '<span class="ops-badge">'+rec.ops+'</span>';
     if (rec._mine && !rec._base) html += '<span class="my-badge">MY LOG</span>';
     html += '</div>';
-    html += '<div class="record-airline">' + fmt(rec.airline) + '</div>';
-    html += '<div class="record-type">' + fmt(rec.type) + '</div>';
-    html += '</div>';
-    html += '<div class="record-right">';
-    html += '<div class="record-spot">' + fmt(rec.spot) + '</div>';
-    html += '<div class="record-date">' + fmt(rec.date) + '</div>';
+    html += '<div class="record-airline">'+fmt(rec.airline)+'</div>';
+    html += '<div class="record-type">'+fmt(rec.type)+'</div>';
+    html += '</div><div class="record-right">';
+    html += '<div class="record-spot">'+fmt(rec.spot)+'</div>';
+    html += '<div class="record-date">'+fmt(rec.date)+'</div>';
     html += '</div></div>';
-    html += '<div class="record-detail">';
-    html += '<div class="detail-grid">';
-    html += '<div><div class="detail-key">TYPE</div><div class="detail-val">' + fmt(rec.type) + '</div></div>';
-    html += '<div><div class="detail-key">COUNTRY</div><div class="detail-val">' + fmt(rec.country) + '</div></div>';
+    html += '<div class="record-detail"><div class="detail-grid">';
+    html += '<div><div class="detail-key">TYPE</div><div class="detail-val">'+fmt(rec.type)+'</div></div>';
+    html += '<div><div class="detail-key">COUNTRY</div><div class="detail-val">'+fmt(rec.country)+'</div></div>';
     html += '</div>';
     if (canEdit) {
       html += '<div class="detail-actions">';
-      html += '<button class="btn-edit" onclick="editRecord(event,'' + rec.id + '')">EDIT</button>';
-      html += '<button class="btn-delete" onclick="deleteRecord(event,'' + rec.id + '')">Delete</button>';
+      html += '<button class="btn-edit" onclick="editRecord(event,''+rec.id+'')">EDIT</button>';
+      html += '<button class="btn-delete" onclick="deleteRecord(event,''+rec.id+'')">Delete</button>';
       html += '</div>';
     }
     html += '</div></div>';
@@ -574,9 +441,9 @@ function renderList() {
   list.innerHTML = html;
   var pag = '';
   if (totalPages > 1) {
-    pag += '<button class="page-btn" onclick="changePage(-1)"' + (page===0?' disabled':'') + '>&#8249;</button>';
-    pag += '<span class="page-info">' + (page+1) + ' / ' + totalPages + '</span>';
-    pag += '<button class="page-btn" onclick="changePage(1)"' + (page>=totalPages-1?' disabled':'') + '>&#8250;</button>';
+    pag += '<button class="page-btn" onclick="changePage(-1)"'+(page===0?' disabled':'')+'>&#8249;</button>';
+    pag += '<span class="page-info">'+(page+1)+' / '+totalPages+'</span>';
+    pag += '<button class="page-btn" onclick="changePage(1)"'+(page>=totalPages-1?' disabled':'')+'>&#8250;</button>';
   }
   document.getElementById('pagination').innerHTML = pag;
 }
@@ -584,7 +451,7 @@ function renderList() {
 function toggleCard(id) { expandedId = expandedId===id ? null : id; renderList(); }
 function changePage(dir) { page+=dir; expandedId=null; renderList(); window.scrollTo(0,0); }
 
-// MODAL
+// ── Modal ─────────────────────────────────────────────────────────
 function openModal(rec) {
   document.getElementById('edit-id').value   = rec ? rec.id : '';
   document.getElementById('modal-title').textContent = rec ? 'EDIT SIGHTING' : 'LOG NEW SIGHTING';
@@ -602,17 +469,15 @@ function openModal(rec) {
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 
 function checkDup() {
-  var reg    = document.getElementById('f-reg').value.trim().toUpperCase();
+  var reg = document.getElementById('f-reg').value.trim().toUpperCase();
   var editId = document.getElementById('edit-id').value;
-  var warn   = document.getElementById('dup-warn');
-  var btn    = document.getElementById('save-btn');
+  var warn = document.getElementById('dup-warn');
+  var btn  = document.getElementById('save-btn');
   if (!reg || editId) { warn.style.display='none'; btn.disabled=false; return; }
   var found = null;
-  for (var i=0; i<db.length; i++) {
-    if (db[i].registration.toUpperCase() === reg) { found = db[i]; break; }
-  }
+  for (var i=0; i<db.length; i++) { if (db[i].registration.toUpperCase()===reg) { found=db[i]; break; } }
   if (found) {
-    warn.textContent = 'WARNING: ' + reg + ' already exists — ' + (found.airline||'Unknown') + ', ' + (found.type||'Unknown type') + ', spotted at ' + (found.spot||'?') + ' on ' + (found.date||'?');
+    warn.textContent = 'WARNING: '+reg+' already exists -- '+(found.airline||'Unknown')+', '+(found.type||'Unknown type')+', spotted at '+(found.spot||'?')+' on '+(found.date||'?');
     warn.style.display = 'block';
     btn.disabled = true;
   } else {
@@ -626,12 +491,10 @@ async function saveRecord() {
   if (!reg) { alert('Registration is required'); return; }
   var editId = document.getElementById('edit-id').value;
   if (!editId) {
-    for (var i=0; i<db.length; i++) {
-      if (db[i].registration.toUpperCase() === reg) return;
-    }
+    for (var i=0; i<db.length; i++) { if (db[i].registration.toUpperCase()===reg) return; }
   }
   var payload = {
-    user_id: currentUser.id,
+    logged_by: currentUsername,
     registration: reg,
     airline: document.getElementById('f-airline').value.trim(),
     type: document.getElementById('f-type').value.trim(),
@@ -654,18 +517,14 @@ function editRecord(e, id) {
   e.stopPropagation();
   for (var i=0; i<db.length; i++) { if (db[i].id===id) { openModal(db[i]); return; } }
 }
-
 async function deleteRecord(e, id) {
   e.stopPropagation();
   if (!confirm('Delete this sighting?')) return;
-  try {
-    await sbDelete(id);
-    showToast('Sighting deleted');
-    await initApp();
-  } catch(e) { showToast('Delete failed: ' + e.message, 'error'); }
+  try { await sbDelete(id); showToast('Sighting deleted'); await initApp(); }
+  catch(e) { showToast('Delete failed: ' + e.message, 'error'); }
 }
 
-// TABS
+// ── Tabs ──────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -676,50 +535,39 @@ function switchTab(tab, btn) {
 
 function renderStats() {
   var airlines={}, spotsMap={}, countriesMap={};
-  db.forEach(function(r) {
+  db.forEach(function(r){
     if(r.airline) airlines[r.airline]=(airlines[r.airline]||0)+1;
     if(r.spot)    spotsMap[r.spot]=(spotsMap[r.spot]||0)+1;
     if(r.country) countriesMap[r.country]=(countriesMap[r.country]||0)+1;
   });
-  var topA = Object.entries(airlines).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
-  var topS = Object.entries(spotsMap).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
-  var topC = Object.entries(countriesMap).sort(function(a,b){return b[1]-a[1];}).slice(0,20);
-  var tA = new Set(db.map(function(r){return r.airline;}).filter(Boolean)).size;
-  var tS = new Set(db.map(function(r){return r.spot;}).filter(Boolean)).size;
-  var myCount = db.filter(function(r){return r._mine && !r._base;}).length;
-  var h = '';
-  h += '<div class="stats-bar" style="margin-bottom:20px">';
-  h += '<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'+db.length+'</div><div class="stat-label">SIGHTINGS</div></div>';
-  h += '<div class="stat-card"><div class="stat-num" style="color:var(--warning)">'+tA+'</div><div class="stat-label">AIRLINES</div></div>';
-  h += '<div class="stat-card"><div class="stat-num" style="color:var(--success)">'+tS+'</div><div class="stat-label">AIRPORTS</div></div>';
-  h += '</div>';
-  h += '<div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">';
-  h += '<span style="font-family:Orbitron,sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span>';
-  h += '<span style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:var(--accent)">'+myCount+'</span>';
-  h += '</div>';
-  h += '<div class="stats-section"><h3>TOP AIRLINES</h3>';
-  topA.forEach(function(item) {
-    h += '<div class="bar-row"><div class="bar-meta"><span class="bar-name">'+item[0]+'</span><span class="bar-count" style="color:var(--warning)">'+item[1]+'</span></div>';
-    h += '<div class="bar-track"><div class="bar-fill" style="width:'+(item[1]/topA[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>';
-  });
-  h += '</div>';
-  h += '<div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3>';
-  topS.forEach(function(item) {
-    h += '<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:JetBrains Mono,monospace;font-weight:700">'+item[0]+'</span><span class="bar-count" style="color:var(--success)">'+item[1]+'</span></div>';
-    h += '<div class="bar-track"><div class="bar-fill" style="width:'+(item[1]/topS[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>';
-  });
-  h += '</div>';
-  h += '<div class="stats-section"><h3>BY COUNTRY</h3><div class="country-grid">';
-  topC.forEach(function(item) {
-    h += '<div class="country-item"><span class="country-name">'+item[0]+'</span><span class="country-count">'+item[1]+'</span></div>';
-  });
-  h += '</div></div>';
+  var topA=Object.entries(airlines).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var topS=Object.entries(spotsMap).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+  var topC=Object.entries(countriesMap).sort(function(a,b){return b[1]-a[1];}).slice(0,20);
+  var tA=new Set(db.map(function(r){return r.airline;}).filter(Boolean)).size;
+  var tS=new Set(db.map(function(r){return r.spot;}).filter(Boolean)).size;
+  var myCount=db.filter(function(r){return r._mine&&!r._base;}).length;
+  var h='';
+  h+='<div class="stats-bar" style="margin-bottom:20px">';
+  h+='<div class="stat-card"><div class="stat-num" style="color:var(--accent)">'+db.length+'</div><div class="stat-label">SIGHTINGS</div></div>';
+  h+='<div class="stat-card"><div class="stat-num" style="color:var(--warning)">'+tA+'</div><div class="stat-label">AIRLINES</div></div>';
+  h+='<div class="stat-card"><div class="stat-num" style="color:var(--success)">'+tS+'</div><div class="stat-label">AIRPORTS</div></div></div>';
+  h+='<div class="stat-card" style="margin-bottom:20px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<span style="font-family:Orbitron,sans-serif;font-size:11px;color:var(--muted);letter-spacing:0.1em">MY LOGGED SIGHTINGS</span>';
+  h+='<span style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:var(--accent)">'+myCount+'</span></div>';
+  h+='<div class="stats-section"><h3>TOP AIRLINES</h3>';
+  topA.forEach(function(x){h+='<div class="bar-row"><div class="bar-meta"><span class="bar-name">'+x[0]+'</span><span class="bar-count" style="color:var(--warning)">'+x[1]+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+(x[1]/topA[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--warning),var(--accent))"></div></div></div>';});
+  h+='</div><div class="stats-section"><h3>TOP SPOTTING LOCATIONS</h3>';
+  topS.forEach(function(x){h+='<div class="bar-row"><div class="bar-meta"><span class="bar-name" style="font-family:JetBrains Mono,monospace;font-weight:700">'+x[0]+'</span><span class="bar-count" style="color:var(--success)">'+x[1]+'</span></div><div class="bar-track"><div class="bar-fill" style="width:'+(x[1]/topS[0][1]*100).toFixed(1)+'%;background:linear-gradient(90deg,var(--success),var(--accent))"></div></div></div>';});
+  h+='</div><div class="stats-section"><h3>BY COUNTRY</h3><div class="country-grid">';
+  topC.forEach(function(x){h+='<div class="country-item"><span class="country-name">'+x[0]+'</span><span class="country-count">'+x[1]+'</span></div>';});
+  h+='</div></div>';
   document.getElementById('tab-stats').innerHTML = h;
 }
 
-window.addEventListener('load', async function() {
-  var ok = await sbGetSession();
-  if (ok) await initApp();
+// ── Session restore ───────────────────────────────────────────────
+window.addEventListener('load', function() {
+  var saved = sessionStorage.getItem('spotterUser');
+  if (saved && USERS[saved]) { currentUsername = saved; initApp(); }
 });
 </script>
 
