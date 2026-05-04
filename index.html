@@ -319,7 +319,6 @@ async function sbSignIn(email, pass) {
 }
 
 async function sbSignOut() {
-  try { await sbFetch('/auth/v1/logout', { method: 'POST' }); } catch(e) {}
   SB_TOKEN = null;
   currentUser = null;
   sessionStorage.removeItem('sb_token');
@@ -709,8 +708,13 @@ function renderStats() {
 }
 
 window.addEventListener('load', async function() {
-  var ok = await sbGetSession();
-  if (ok) await initApp();
+  var token = sessionStorage.getItem('sb_token');
+  var user  = sessionStorage.getItem('sb_user');
+  if (token && user) {
+    SB_TOKEN = token;
+    currentUser = JSON.parse(user);
+    await initApp();
+  }
 });
 </script>
 </body>
